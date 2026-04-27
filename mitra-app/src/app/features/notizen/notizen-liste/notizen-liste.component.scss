@@ -1,0 +1,305 @@
+.app {
+  background: var(--bg-0);
+  min-height: 100dvh;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+// ── Sticky Header ─────────────────────────────────────────────────────────────
+
+.header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: var(--z-sticky);
+  padding: 0 var(--sp-3);
+
+  @supports (backdrop-filter: blur(8px)) {
+    background: rgba(15, 15, 14, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 56px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.app-titel {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+// ── Suche ─────────────────────────────────────────────────────────────────────
+
+.suche-wrap {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.suche-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-tertiary);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.suche-input {
+  width: 100%;
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 8px 32px 8px 32px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+
+  &::placeholder { color: var(--text-disabled); }
+
+  &:focus {
+    outline: none;
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+}
+
+.suche-loeschen {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color var(--t-fast);
+
+  &:hover { color: var(--text-secondary); }
+}
+
+// ── Header-Aktionen ───────────────────────────────────────────────────────────
+
+.header-aktionen {
+  display: flex;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+}
+
+.btn-filter {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 8px 10px;
+  position: relative;
+  transition: border-color var(--t-fast), color var(--t-fast);
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.aktiv { border-color: var(--border-accent); color: var(--accent); }
+  &:hover  { color: var(--text-secondary); }
+}
+
+.filter-punkt {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.btn-neu {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #000;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--t-fast), transform var(--t-spring);
+  min-height: 40px;
+
+  &:hover  { opacity: 0.88; }
+  &:active { transform: scale(0.96); }
+}
+
+// ── Filter-Drawer ─────────────────────────────────────────────────────────────
+
+.filter-drawer {
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.filter-drawer-inner {
+  padding: var(--sp-3) var(--sp-4);
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.filter-gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.filter-label {
+  color: var(--text-tertiary);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip {
+  --chip-farbe: var(--text-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+
+  &:hover {
+    border-color: var(--border-muted);
+    color: var(--text-secondary);
+  }
+
+  &.aktiv {
+    background: color-mix(in srgb, var(--chip-farbe) 15%, transparent);
+    border-color: color-mix(in srgb, var(--chip-farbe) 40%, transparent);
+    color: var(--chip-farbe);
+  }
+}
+
+.loeschen-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: left;
+  transition: color var(--t-fast);
+  align-self: flex-start;
+
+  &:hover { color: var(--text-secondary); }
+}
+
+// ── Liste ─────────────────────────────────────────────────────────────────────
+
+.liste {
+  padding: var(--sp-3) var(--sp-3) calc(var(--sp-3) + 64px);
+  max-width: 640px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding-bottom: var(--sp-5);
+  }
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton-karte {
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-2);
+}
+
+.sk-badges { display: flex; gap: 8px; margin-bottom: 10px; }
+
+.sk-badge, .sk-zeile {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.sk-badge           { height: 22px; width: 60px; }
+.sk-badge.kurz      { width: 48px; }
+.sk-zeile           { height: 14px; margin-bottom: 8px; }
+.sk-zeile.lang      { width: 65%; }
+.sk-zeile.mittel    { width: 40%; }
+
+// ── Leerzustand ───────────────────────────────────────────────────────────────
+
+.leer {
+  text-align: center;
+  padding: var(--sp-6) var(--sp-4);
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.leer-icon  { font-size: 40px; margin-bottom: var(--sp-3); opacity: 0.5; }
+
+.leer-titel {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+}
+
+.leer-hinweis { font-size: 13px; }
+
+.akzent { color: var(--accent); font-weight: 600; }
+
+.leer-aktion {
+  margin-top: var(--sp-3);
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  color: var(--text-tertiary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+
+  &:hover { border-color: var(--border-muted); color: var(--text-secondary); }
+}

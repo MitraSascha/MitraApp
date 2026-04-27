@@ -1,0 +1,194 @@
+.freitext-eingabe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+// ── Eingabebereich ────────────────────────────────────────────────────────────
+
+.input-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+
+  textarea {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    box-sizing: border-box;
+
+    &::placeholder { color: var(--text-disabled); }
+
+    &:focus {
+      outline: none;
+      border-color: var(--border-accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+  }
+}
+
+.input-actions {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.analyse-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 9px 18px;
+  color: #000;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--t-fast), transform var(--t-spring);
+
+  &:hover  { opacity: 0.85; }
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ── Fehler ────────────────────────────────────────────────────────────────────
+
+.fehler {
+  color: #f87171;
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 8px 12px;
+  background: rgba(248, 113, 113, 0.08);
+  border-radius: var(--radius-sm);
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+
+.summary-box {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 10px 12px;
+  background: var(--bg-0);
+  border-left: 2px solid var(--border-accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+// ── Vorschläge ────────────────────────────────────────────────────────────────
+
+.vorschlaege {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vorschlag {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 10px;
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: opacity var(--t-fast), background var(--t-fast);
+
+  &.abgelehnt {
+    opacity: 0.35;
+    background: var(--bg-0);
+  }
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  flex-shrink: 0;
+  min-width: 24px;
+  transition: color var(--t-fast);
+
+  &.an    { color: var(--accent); }
+  &:not(.an) { color: var(--text-disabled); }
+}
+
+.cat-badge {
+  background: var(--bg-3);
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  padding: 2px 7px;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.hersteller {
+  color: #f97316;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.item-text {
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+// ── Aktionen ──────────────────────────────────────────────────────────────────
+
+.vorschlag-actions {
+  display: flex;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+  padding-top: var(--sp-1);
+}
+
+.accept-all-btn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+
+  &:hover { border-color: var(--border-muted); color: var(--text-primary); }
+}
+
+.bestaetigen-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  color: #000;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--t-fast), transform var(--t-spring);
+
+  &:hover  { opacity: 0.85; }
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

@@ -1,0 +1,109 @@
+// =============================================================
+// MitraApp — Global Styles
+// =============================================================
+
+// Design Tokens
+@use 'styles/tokens' as *;
+
+// Reset
+@use 'styles/reset' as *;
+
+// Typografie
+@use 'styles/typography' as *;
+
+// =============================================================
+// Globale Layout-Utilities
+// =============================================================
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+// Hauptlayout: Bottom-Nav auf Mobile, Sidebar auf Tablet+
+.app-layout {
+  display: flex;
+  min-height: 100dvh;
+
+  .app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: var(--nav-bottom-height);
+
+    @media (min-width: 768px) {
+      padding-bottom: 0;
+      margin-left: var(--sidebar-width);
+    }
+  }
+}
+
+// Karten
+.card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.card-elevated {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-md);
+}
+
+// Buttons
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  @extend .btn;
+  background: var(--color-accent);
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+  }
+}
+
+.btn-ghost {
+  @extend .btn;
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+
+  &:hover:not(:disabled) {
+    background: var(--color-bg-elevated);
+  }
+}
+
+// Offline-Indikator
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-warning);
+  color: #000;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-full);
+}

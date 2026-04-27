@@ -1,0 +1,125 @@
+<div class="notiz-karte" [class.offen]="offen()" [style.--karte-farbe]="vw.color">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="header"
+    (click)="offen.set(!offen())"
+    role="button"
+    [attr.aria-expanded]="offen()"
+    tabindex="0"
+    (keydown.enter)="offen.set(!offen())"
+    (keydown.space)="$event.preventDefault(); offen.set(!offen())">
+
+    <div class="header-main">
+      <div class="badges">
+        <span class="badge vonwem-badge">{{ vw.icon }} {{ vw.label }}</span>
+        <span class="badge topic-badge" [style.--topic-farbe]="td.color">{{ td.icon }} {{ td.label }}</span>
+        <button class="badge status-badge"
+          [style.--status-farbe]="statusFarbe(notiz().status)"
+          (click)="$event.stopPropagation(); statusWechseln()"
+          [attr.aria-label]="'Status: ' + statusLabel(notiz().status) + ' – klicken zum Ändern'">
+          {{ statusLabel(notiz().status) }}
+        </button>
+      </div>
+
+      <div class="notiz-titel">
+        @if (notiz().titel) { {{ notiz().titel }} }
+        @else { <span class="kein-titel">Kein Titel</span> }
+      </div>
+      <div class="notiz-datum">{{ formatDatum(notiz().erstellt_am) }}</div>
+    </div>
+
+    <div class="header-aktionen">
+      @if (gefilterteItems.length > 0) {
+        <span class="item-anzahl" aria-label="{{ gefilterteItems.length }} Einträge">
+          {{ gefilterteItems.length }}
+        </span>
+      }
+      <button class="loeschen-btn" (click)="$event.stopPropagation(); loeschenBestaetigen()" aria-label="Notiz löschen">🗑</button>
+      <span class="chevron" aria-hidden="true">{{ offen() ? '▾' : '▸' }}</span>
+    </div>
+  </div>
+
+  <!-- ── Body ────────────────────────────────────────────────────────────── -->
+  @if (offen()) {
+    <div class="body">
+      <!-- Meta -->
+      <div class="meta-row">
+        <input
+          [value]="notiz().titel"
+          (input)="feldAktualisieren('titel', $any($event.target).value)"
+          placeholder="Titel / Name (z.B. Müller – Bad EG)"
+          aria-label="Titel" />
+        <div class="meta-selects">
+          <select
+            [value]="notiz().vonwem"
+            (change)="feldAktualisieren('vonwem', $any($event.target).value)"
+            aria-label="Von wem">
+            @for (e of vonwemEntries; track e[0]) {
+              <option [value]="e[0]">{{ e[1].icon }} {{ e[1].label }}</option>
+            }
+          </select>
+          <select
+            [value]="notiz().topic"
+            (change)="feldAktualisieren('topic', $any($event.target).value)"
+            aria-label="Thema">
+            @for (e of topicsEntries; track e[0]) {
+              <option [value]="e[0]">{{ e[1].icon }} {{ e[1].label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (notiz().summary) {
+        <div class="summary">{{ notiz().summary }}</div>
+      }
+
+      <!-- Modus-Toggle -->
+      <div class="modus-toggle" role="group" aria-label="Eingabemodus">
+        @for (m of [['schnell', '⌨ Schnell'], ['freitext', '✦ KI-Text']]; track m[0]) {
+          <button
+            [class.aktiv]="eingabeModus() === m[0]"
+            [attr.aria-pressed]="eingabeModus() === m[0]"
+            (click)="eingabeModus.set($any(m[0]))">{{ m[1] }}</button>
+        }
+      </div>
+
+      <!-- Eingabe -->
+      @if (eingabeModus() === 'schnell') {
+        <app-schnell-eingabe [topicConfig]="td" (added)="itemHinzufuegen($event)" />
+      } @else {
+        <app-freitext-eingabe
+          [topicId]="notiz().topic ?? 'allgemein'"
+          [topicConfig]="td"
+          (confirmed)="freitextBestaetigt($event)" />
+      }
+
+      <!-- Items -->
+      @if (gefilterteItems.length > 0) {
+        <div class="items-liste">
+          @for (item of gefilterteItems; track item.id) {
+            <app-item-zeile
+              [item]="item"
+              [topicConfig]="td"
+              (changed)="itemAktualisieren(item.id, $event)"
+              (deleted)="itemLoeschen(item.id)" />
+          }
+        </div>
+      }
+
+      <!-- Rohtext -->
+      @if (notiz().raw_transcript) {
+        <details class="rohtext">
+          <summary>Rohtext anzeigen</summary>
+          <div class="rohtext-inhalt">{{ notiz().raw_transcript }}</div>
+        </details>
+      }
+
+      <!-- Export -->
+      <div class="export-zeile">
+        <button class="export-btn" (click)="exportPdf()">↓ PDF</button>
+        <button class="export-btn" (click)="exportJson()">↓ JSON</button>
+        <button class="export-btn" (click)="exportMarkdown()">↓ MD</button>
+      </div>
+    </div>
+  }
+</div>

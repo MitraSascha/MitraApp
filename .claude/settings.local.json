@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b \"C:\\\\Users\\\\sasch\\\\.claude\")",
+      "Bash(ng version:*)",
+      "Bash(ng new:*)",
+      "Bash(ng add:*)",
+      "Bash(ng build:*)",
+      "Bash(mkdir -p \"W:/Dev/Privat/Pironi/mitra-app/src/app/core/db\")",
+      "Bash(mkdir -p \"W:/Dev/Privat/Pironi/mitra-app/src/app/core/models\")",
+      "Bash(mkdir -p \"W:/Dev/Privat/Pironi/mitra-app/src/app/shared/ui\")",
+      "Bash(mkdir -p \"W:/Dev/Privat/Pironi/mitra-app/src/app/features/notizen/stores\")",
+      "Bash(mkdir -p \"W:/Dev/Privat/Pironi/mitra-app/src/app/features/termine/stores\")",
+      "Bash(npm install:*)",
+      "Bash(npx ng:*)",
+      "Bash(docker --version)",
+      "Bash(docker compose:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker exec pironi-django-1 python manage.py shell -c ':*)",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -v -X POST http://localhost:8000/api/auth/login/ -H 'Content-Type: application/json' -d '{\"username\":\"admin\",\"password\":\"admin123\"}')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\)[0]; nets=d['NetworkSettings']['Networks']; [print\\(k, v['IPAddress']\\) for k,v in nets.items\\(\\)]\")",
+      "Bash(pip install:*)",
+      "Bash(python -c ':*)",
+      "Read(//mnt/w/Dev/Privat/**)",
+      "Bash(docker-compose restart:*)",
+      "Bash(npm run:*)",
+      "Bash(xargs grep:*)",
+      "WebSearch",
+      "WebFetch(domain:hero-software.de)",
+      "WebFetch(domain:www.make.com)",
+      "Bash(docker restart:*)",
+      "Bash(docker run:*)",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'W:\\\\Dev\\\\Privat\\\\Pironi' -Force | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'W:\\\\Dev\\\\Privat\\\\Pironi\\\\backend' -Force | Select-Object Name\")",
+      "Bash(docker volume:*)"
+    ]
+  }
+}

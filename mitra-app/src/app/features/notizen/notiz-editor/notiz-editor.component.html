@@ -1,0 +1,117 @@
+<div class="notiz-editor">
+  <header class="editor-header">
+    <button type="button" class="btn-back" (click)="abbrechen()">← Zurück</button>
+    <h1>{{ isEditMode() ? 'Notiz bearbeiten' : 'Neue Notiz' }}</h1>
+    <button
+      type="button"
+      class="btn-save"
+      [disabled]="!titel().trim() || isSaving()"
+      (click)="speichern()"
+    >
+      @if (isSaving()) { Speichern... } @else { Speichern }
+    </button>
+  </header>
+
+  <div class="editor-body">
+    <!-- Titel -->
+    <div class="form-group">
+      <label for="titel">Titel</label>
+      <input
+        id="titel"
+        type="text"
+        [ngModel]="titel()"
+        (ngModelChange)="titel.set($event)"
+        name="titel"
+        placeholder="Notiz-Titel"
+        required
+      />
+    </div>
+
+    <!-- Typ -->
+    <div class="form-group">
+      <label>Typ</label>
+      <div class="typ-chips">
+        @for (opt of typOptionen; track opt.value) {
+          <button
+            type="button"
+            class="typ-chip"
+            [class.active]="typ() === opt.value"
+            (click)="typ.set(opt.value)"
+          >{{ opt.label }}</button>
+        }
+      </div>
+    </div>
+
+    <!-- Diktat + KI-Aktionen -->
+    <div class="diktier-row">
+      <app-diktier-button (transkriptFertig)="onTranskriptFertig($event)" />
+      <button
+        type="button"
+        class="btn-ki"
+        [disabled]="!freitext().trim() || isKiLoading()"
+        (click)="strukturierePerKI()"
+      >
+        @if (isKiLoading()) { KI lädt... } @else { KI strukturieren }
+      </button>
+    </div>
+
+    <!-- Tab-Navigation -->
+    <div class="tab-nav">
+      <button class="tab" [class.active]="activeTab() === 'freitext'" (click)="activeTab.set('freitext')">
+        Freitext
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'ki'" (click)="activeTab.set('ki')">
+        KI-Ergebnis
+        @if (kiResult()) { <span class="tab-badge">✓</span> }
+      </button>
+    </div>
+
+    <!-- Freitext-Tab -->
+    @if (activeTab() === 'freitext') {
+      <div class="form-group">
+        <textarea
+          [ngModel]="freitext()"
+          (ngModelChange)="freitext.set($event)"
+          name="freitext"
+          placeholder="Notiz hier eingeben oder per Diktat erfassen..."
+          rows="8"
+        ></textarea>
+      </div>
+    }
+
+    <!-- KI-Tab -->
+    @if (activeTab() === 'ki') {
+      @if (kiResult()) {
+        <div class="ki-result">
+          @if (kiResult()!.ki_text) {
+            <p class="ki-text">{{ kiResult()!.ki_text }}</p>
+          }
+          <ul class="ki-items">
+            @for (item of kiResult()!.items; track item.id) {
+              <li class="ki-item ki-item-{{ item.typ }}">
+                <span class="ki-item-typ">{{ item.typ }}</span>
+                <span class="ki-item-text">{{ item.text }}</span>
+                @if (item.hersteller) {
+                  <span class="ki-item-hersteller">{{ item.hersteller }}</span>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <div class="ki-empty">
+          Noch kein KI-Ergebnis. Freitext eingeben und „KI strukturieren" klicken.
+        </div>
+      }
+    }
+
+    <!-- Hersteller-Pills -->
+    <div class="form-group">
+      <label>Hersteller</label>
+      <app-hersteller-pills
+        [selected]="herstellerPills()"
+        (selectedChange)="herstellerPills.set($event)"
+      />
+    </div>
+  </div>
+</div>

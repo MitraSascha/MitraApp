@@ -1,0 +1,62 @@
+<div class="termine-liste">
+  <header class="liste-header">
+    <h1>Termine</h1>
+    <a routerLink="neu" class="btn-fab" title="Neuer Termin">+</a>
+  </header>
+
+  @if (store.isLoading()) {
+    <div class="loading">Laden...</div>
+  }
+
+  <!-- Heute -->
+  @if (store.heutigeTermine().length > 0) {
+    <section class="termin-gruppe">
+      <h2 class="gruppe-label">Heute</h2>
+      <ul class="termin-items">
+        @for (t of store.heutigeTermine(); track t.id) {
+          <li>
+            <a [routerLink]="[t.id]" class="termin-item typ-{{ t.typ }}">
+              <div class="termin-zeit">{{ formatDatum(t.beginn) }}</div>
+              <div class="termin-info">
+                <span class="termin-titel">{{ t.titel }}</span>
+                @if (t.adresse) {
+                  <span class="termin-adresse">{{ t.adresse.strasse }} {{ t.adresse.hausnummer }}, {{ t.adresse.ort }}</span>
+                }
+              </div>
+              <span class="termin-typ-badge">{{ t.typ }}</span>
+              <button class="btn-del" (click)="loesche(t, $event)">✕</button>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- Morgen -->
+  @if (store.morgigTermine().length > 0) {
+    <section class="termin-gruppe">
+      <h2 class="gruppe-label">Morgen</h2>
+      <ul class="termin-items">
+        @for (t of store.morgigTermine(); track t.id) {
+          <li>
+            <a [routerLink]="[t.id]" class="termin-item typ-{{ t.typ }}">
+              <div class="termin-zeit">{{ formatDatum(t.beginn) }}</div>
+              <div class="termin-info">
+                <span class="termin-titel">{{ t.titel }}</span>
+              </div>
+              <span class="termin-typ-badge">{{ t.typ }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- Alle weiteren -->
+  @if (store.termine().length === 0 && !store.isLoading()) {
+    <div class="empty-state">
+      <p>Keine Termine vorhanden.</p>
+      <a routerLink="neu" class="btn-primary">Ersten Termin erstellen</a>
+    </div>
+  }
+</div>

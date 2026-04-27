@@ -1,0 +1,85 @@
+@if (notiz()) {
+  <div class="notiz-detail">
+    <header class="detail-header">
+      <button class="btn-back" (click)="zurueck()">← Zurück</button>
+      <div class="header-actions">
+        <button class="btn-edit" (click)="bearbeiten()">Bearbeiten</button>
+        <button class="btn-delete" (click)="loeschen()">Löschen</button>
+      </div>
+    </header>
+
+    <div class="detail-body">
+      <div class="detail-meta">
+        <span class="typ-badge">{{ notiz()!.typ }}</span>
+        <span class="datum">{{ notiz()!.erstellt_am | date:'dd.MM.yyyy HH:mm' }}</span>
+        @if (notiz()!.sync_status === 'pending') {
+          <span class="sync-warn">Nicht synchronisiert</span>
+        }
+      </div>
+
+      <h1 class="detail-titel">{{ notiz()!.titel }}</h1>
+
+      <!-- Status-Buttons -->
+      <div class="status-row">
+        @for (s of statusOptionen; track s.value) {
+          <button
+            class="status-btn"
+            [class.active]="notiz()!.status === s.value"
+            (click)="statusAendern(s.value)"
+          >
+            {{ s.label }}
+          </button>
+        }
+      </div>
+
+      <!-- Hersteller-Pills -->
+      @if (notiz()!.hersteller_pills.length > 0) {
+        <div class="hersteller-section">
+          @for (h of notiz()!.hersteller_pills; track h) {
+            <span class="pill">{{ h }}</span>
+          }
+        </div>
+      }
+
+      <!-- Tab-Navigation -->
+      <div class="tab-nav">
+        <button class="tab" [class.active]="activeTab() === 'freitext'" (click)="activeTab.set('freitext')">
+          Freitext
+        </button>
+        @if (notiz()!.ki_items?.length) {
+          <button class="tab" [class.active]="activeTab() === 'ki'" (click)="activeTab.set('ki')">
+            KI-Ergebnis
+          </button>
+        }
+      </div>
+
+      @if (activeTab() === 'freitext') {
+        <div class="content-box">
+          <p class="freitext">{{ notiz()!.freitext || 'Kein Freitext.' }}</p>
+        </div>
+      }
+
+      @if (activeTab() === 'ki' && notiz()!.ki_items?.length) {
+        <div class="ki-items">
+          @for (item of notiz()!.ki_items!; track item.id) {
+            <div class="ki-item ki-item-{{ item.typ }}">
+              <span class="ki-typ">{{ item.typ }}</span>
+              <span class="ki-text">{{ item.text }}</span>
+              @if (item.hersteller) {
+                <span class="ki-hersteller">{{ item.hersteller }}</span>
+              }
+              @if (item.menge) {
+                <span class="ki-menge">{{ item.menge }} {{ item.einheit }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="not-found">
+    <p>Notiz nicht gefunden.</p>
+    <button (click)="zurueck()">Zurück zur Liste</button>
+  </div>
+}

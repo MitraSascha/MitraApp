@@ -1,0 +1,82 @@
+.foto-upload {
+  width: 100%;
+}
+
+.upload-area {
+  width: 100%;
+  min-height: 180px;
+  background: var(--color-surface);
+  border: 2px dashed rgba(255,255,255,0.15);
+  border-radius: var(--border-radius);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  .upload-icon { font-size: 2rem; }
+  .upload-text { color: var(--color-text-primary); font-weight: 500; }
+  .upload-hint { font-size: 0.8rem; color: var(--color-text-secondary); }
+}
+
+.preview-container {
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.preview-img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: var(--border-radius);
+}
+
+.processing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-neu {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.error-msg {
+  margin-top: var(--spacing-sm);
+  font-size: 0.8rem;
+  color: var(--color-warning);
+}

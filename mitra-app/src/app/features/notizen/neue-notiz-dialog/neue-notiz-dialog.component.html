@@ -1,0 +1,50 @@
+<div class="overlay" (click)="closed.emit()" role="dialog" aria-modal="true" aria-label="Neue Notiz erstellen">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <div class="dialog-title">NEUE NOTIZ</div>
+
+    <div class="section">
+      <div class="section-label">VON WEM</div>
+      <div class="chips">
+        @for (entry of vonwemEntries; track entry[0]) {
+          <button
+            class="chip"
+            [class.active]="vonwem() === entry[0]"
+            [style.background]="vonwem() === entry[0] ? entry[1].color + '20' : 'transparent'"
+            [style.border-color]="vonwem() === entry[0] ? entry[1].color : 'var(--border-muted)'"
+            [style.color]="vonwem() === entry[0] ? entry[1].color : 'var(--text-tertiary)'"
+            (click)="vonwem.set($any(entry[0]))">
+            {{ entry[1].icon }} {{ entry[1].label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">THEMA</div>
+      <div class="chips">
+        @for (entry of topicsEntries; track entry[0]) {
+          <button
+            class="chip"
+            [class.active]="topic() === entry[0]"
+            [style.background]="topic() === entry[0] ? entry[1].color + '20' : 'transparent'"
+            [style.border-color]="topic() === entry[0] ? entry[1].color : 'var(--border-muted)'"
+            [style.color]="topic() === entry[0] ? entry[1].color : 'var(--text-tertiary)'"
+            (click)="topic.set($any(entry[0]))">
+            {{ entry[1].icon }} {{ entry[1].label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <button
+      class="create-btn"
+      [style.background]="VONWEM[vonwem()].color"
+      [style.box-shadow]="'0 0 20px ' + VONWEM[vonwem()].color + '40'"
+      (click)="erstellen()">
+      {{ VONWEM[vonwem()].icon }} {{ VONWEM[vonwem()].label }}
+      &nbsp;·&nbsp;
+      {{ TOPICS[topic()].icon }} {{ TOPICS[topic()].label }}
+      — Notiz erstellen
+    </button>
+  </div>
+</div>

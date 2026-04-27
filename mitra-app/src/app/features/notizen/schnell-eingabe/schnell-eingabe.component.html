@@ -1,0 +1,41 @@
+<div class="schnell-eingabe">
+  <div class="row">
+    <select
+      [value]="typ()"
+      (change)="typ.set($any($event.target).value); hersteller.set('')"
+      [style.border-color]="catObj.color + '44'"
+      [style.color]="catObj.color"
+      aria-label="Kategorie">
+      @for (c of topicConfig().categories; track c.id) {
+        <option [value]="c.id">{{ c.label }}</option>
+      }
+    </select>
+
+    <div class="input-row">
+      <input
+        [value]="text()"
+        (input)="text.set($any($event.target).value)"
+        (keydown.enter)="submit()"
+        [placeholder]="isProdukt ? 'Produkt… (Enter)' : 'Inhalt… (Enter)'"
+        aria-label="Eintrag" />
+      <button
+        (click)="submit()"
+        [style.background]="catObj.color"
+        aria-label="Hinzufügen">+</button>
+    </div>
+  </div>
+
+  @if (isProdukt && topicConfig().hersteller.length > 0) {
+    <div class="hersteller-chips">
+      @for (h of topicConfig().hersteller; track h) {
+        <button
+          class="h-chip"
+          [class.selected]="hersteller() === h"
+          [style.background]="hersteller() === h ? catObj.color : 'var(--bg-3)'"
+          [style.border-color]="hersteller() === h ? catObj.color : 'var(--border-subtle)'"
+          [style.color]="hersteller() === h ? '#000' : 'var(--text-tertiary)'"
+          (click)="toggleHersteller(h)">{{ h }}</button>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,27 @@
+# Alle Logs live verfolgen
+  docker compose -f docker-compose.dev.yml logs -f
+
+  # Nur Frontend-Logs
+  docker logs pironi-frontend-1 -f
+
+  # Stoppen
+  docker compose -f docker-compose.dev.yml down
+
+  # Neu starten (ohne Rebuild)
+  docker compose -f docker-compose.dev.yml up -d
+
+  # Rebuild wenn Dockerfile geändert
+  docker compose -f docker-compose.dev.yml up -d --build
+
+  Hinweis zur Artikelstamm-DB
+
+  Der lokale Container ist leer. Wenn du die echten Daten vom Strato-Server willst:
+  # 1. Auf dem Strato-Server (SSH):
+  docker exec artikelstamm_db pg_dump -U artikelstamm artikelstamm > dump.sql
+
+  # 2. Dump runterladen (lokal):
+  scp user@strato-server:dump.sql .
+
+  # 3. In lokalen Container importieren:
+  docker cp dump.sql pironi-artikelstamm-1:/tmp/
+  docker exec pironi-artikelstamm-1 psql -U artikelstamm -d artikelstamm -f /tmp/dump.sql

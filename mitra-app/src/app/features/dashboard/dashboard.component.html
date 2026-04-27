@@ -1,0 +1,102 @@
+<div class="dashboard">
+  <header class="dash-header">
+    <div class="dash-greeting">
+      <h1>Dashboard</h1>
+      @if (store.pendingSync() > 0) {
+        <span class="sync-badge" title="{{ store.pendingSync() }} Einträge nicht synchronisiert">
+          ● {{ store.pendingSync() }}
+        </span>
+      }
+    </div>
+  </header>
+
+  <!-- Heutige Termine -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2>Heute</h2>
+      <a routerLink="/termine" class="link-mehr">Alle →</a>
+    </div>
+
+    @if (store.heutigeTermine().length === 0) {
+      <div class="empty-card">Keine Termine heute.</div>
+    } @else {
+      <div class="termine-cards">
+        @for (t of store.heutigeTermine(); track t.id) {
+          <a [routerLink]="['/termine', t.id]" class="termin-card typ-{{ t.typ }}">
+            <span class="termin-zeit">{{ formatZeit(t.beginn) }}</span>
+            <span class="termin-titel">{{ t.titel }}</span>
+            @if (t.typ === 'notdienst') {
+              <span class="notdienst-badge">NOTDIENST</span>
+            }
+          </a>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Morgen -->
+  @if (store.morgigTermine().length > 0) {
+    <section class="dash-section">
+      <div class="section-header">
+        <h2>Morgen</h2>
+      </div>
+      <div class="termine-cards">
+        @for (t of store.morgigTermine().slice(0, 3); track t.id) {
+          <a [routerLink]="['/termine', t.id]" class="termin-card typ-{{ t.typ }}">
+            <span class="termin-zeit">{{ formatZeit(t.beginn) }}</span>
+            <span class="termin-titel">{{ t.titel }}</span>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Offene Aufgaben -->
+  <section class="dash-section">
+    <div class="section-header">
+      <h2>Offene Aufgaben</h2>
+      <a routerLink="/notizen" class="link-mehr">Alle Notizen →</a>
+    </div>
+
+    @if (store.offeneAufgaben().length === 0) {
+      <div class="empty-card">Keine offenen Aufgaben.</div>
+    } @else {
+      <ul class="aufgaben-list">
+        @for (item of store.offeneAufgaben().slice(0, 5); track item.id) {
+          <li class="aufgabe-item">
+            <span class="aufgabe-check">○</span>
+            <span class="aufgabe-text">{{ item.text }}</span>
+            @if (item.hersteller) {
+              <span class="aufgabe-hersteller">{{ item.hersteller }}</span>
+            }
+          </li>
+        }
+      </ul>
+      @if (store.offeneAufgaben().length > 5) {
+        <div class="mehr-hint">+{{ store.offeneAufgaben().length - 5 }} weitere</div>
+      }
+    }
+  </section>
+
+  <!-- Quick-Actions -->
+  <section class="dash-section">
+    <div class="quick-actions">
+      <a routerLink="/notizen" class="quick-btn">
+        <span>📝</span>
+        <span>Notizen</span>
+      </a>
+      <a routerLink="/termine/neu" class="quick-btn">
+        <span>📅</span>
+        <span>Neuer Termin</span>
+      </a>
+      <a routerLink="/visitenkarten" class="quick-btn">
+        <span>🃏</span>
+        <span>Visitenkarten</span>
+      </a>
+      <a routerLink="/wissen" class="quick-btn">
+        <span>🔍</span>
+        <span>Wissen</span>
+      </a>
+    </div>
+  </section>
+</div>

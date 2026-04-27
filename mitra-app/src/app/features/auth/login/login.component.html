@@ -1,0 +1,57 @@
+<div class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="logo-text">Mitra</span>
+      <span class="logo-dot">.</span>
+    </div>
+
+    <h1 class="login-title">Anmelden</h1>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="username">Benutzername</label>
+        <input
+          id="username"
+          type="text"
+          autocomplete="username"
+          [ngModel]="username()"
+          (ngModelChange)="username.set($event)"
+          name="username"
+          required
+          placeholder="Benutzername eingeben"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Passwort</label>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          required
+          placeholder="Passwort eingeben"
+        />
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-message">{{ errorMessage() }}</div>
+      }
+
+      <button
+        type="submit"
+        class="btn-primary"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          Anmelden...
+        } @else {
+          Anmelden
+        }
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,149 @@
+// =============================================================
+// MitraApp — Design Tokens
+// =============================================================
+
+:root {
+  // --- Farben ---
+  --color-bg:           #1C2128;   // Anthrazit (Primary Background)
+  --color-bg-surface:   #2D333B;   // Surface (Cards, Sidebar)
+  --color-bg-elevated:  #373E47;   // Elevated (Modals, Dropdowns)
+  --color-accent:       #E8700A;   // Orange (CTA, Highlights)
+  --color-accent-hover: #CF6209;   // Orange hover
+  --color-text:         #E6EDF3;   // Primärtext
+  --color-text-muted:   #8B949E;   // Sekundärtext / Placeholder
+  --color-border:       #444C56;   // Rahmen
+  --color-success:      #3FB950;
+  --color-warning:      #D29922;
+  --color-error:        #F85149;
+
+  // --- Typografie ---
+  --font-headline:  'IBM Plex Sans', sans-serif;
+  --font-body:      'Inter', sans-serif;
+  --font-mono:      'JetBrains Mono', monospace;
+
+  --font-size-xs:   0.75rem;   //  12px
+  --font-size-sm:   0.875rem;  //  14px
+  --font-size-md:   1rem;      //  16px
+  --font-size-lg:   1.125rem;  //  18px
+  --font-size-xl:   1.25rem;   //  20px
+  --font-size-2xl:  1.5rem;    //  24px
+  --font-size-3xl:  1.875rem;  //  30px
+
+  // --- Abstände ---
+  --space-1:  0.25rem;   //  4px
+  --space-2:  0.5rem;    //  8px
+  --space-3:  0.75rem;   // 12px
+  --space-4:  1rem;      // 16px
+  --space-5:  1.25rem;   // 20px
+  --space-6:  1.5rem;    // 24px
+  --space-8:  2rem;      // 32px
+  --space-10: 2.5rem;    // 40px
+  --space-12: 3rem;      // 48px
+
+  // --- Radien ---
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-full: 9999px;
+
+  // --- Schatten ---
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+
+  // --- Navigation ---
+  --nav-bottom-height: 64px;
+  --sidebar-width: 240px;
+
+  // --- Transitions ---
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+
+  // --- Aliases für Komponenten-Kompatibilität ---
+  --color-primary:        #1C2128;
+  --color-surface:        #2D333B;
+  --color-danger:         #F85149;
+  --color-text-primary:   #E6EDF3;
+  --color-text-secondary: #8B949E;
+
+  --touch-target:   48px;
+  --border-radius:  8px;
+  --spacing-xs:     0.25rem;
+  --spacing-sm:     0.5rem;
+  --spacing-md:     1rem;
+  --spacing-lg:     1.5rem;
+  --spacing-xl:     2rem;
+
+  // ── Notizen Design System (Notizen-App kompatibel) ─────────────────────────
+  // Hintergrund-Ebenen (OLED-nah, Warm-Tint)
+  --bg-0:     #0F0F0E;
+  --bg-1:     #181817;
+  --bg-2:     #222221;
+  --bg-3:     #2C2C2A;
+  --bg-input: #181817;
+
+  // Text-Hierarchie
+  --text-primary:   #F2F2F0;
+  --text-secondary: #9E9E9B;
+  --text-tertiary:  #5E5E5B;
+  --text-disabled:  #3A3A38;
+  --text-accent:    #E8700A;
+
+  // Borders
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-muted:  rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.20);
+  --border-accent: rgba(232, 112, 10, 0.25);
+
+  // Akzent (MitraApp-Orange)
+  --accent:             #E8700A;
+  --accent-dim:         rgba(232, 112, 10, 0.15);
+  --accent-glow:        rgba(232, 112, 10, 0.08);
+  --accent-glow-strong: rgba(232, 112, 10, 0.28);
+
+  // Schriften
+  --font-ui:   'IBM Plex Mono', monospace;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  // Spacing (8px Grid, px-basiert für Notizen-Komponenten)
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+
+  // Radien (Notizen)
+  --radius-pill: 100px;
+
+  // Übergänge
+  --t-fast:   120ms ease;
+  --t-normal: 200ms ease;
+  --t-spring: 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // Z-Index
+  --z-sticky: 100;
+  --z-fab:    9999;
+  --z-modal:  300;
+  --z-toast:  400;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --sp-1: 5px;
+    --sp-2: 10px;
+    --sp-3: 16px;
+    --sp-4: 20px;
+    --sp-5: 32px;
+    --sp-6: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast:   0ms;
+    --t-normal: 0ms;
+    --t-spring: 0ms;
+  }
+}

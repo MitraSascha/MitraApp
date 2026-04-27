@@ -1,0 +1,157 @@
+<div class="editor-page">
+  <header class="editor-header">
+    <button type="button" class="btn-back" (click)="zurueck()">‹</button>
+    <h1 class="editor-title">
+      {{ angebot?.angebotsnummer || 'Neues Angebot' }}
+    </h1>
+    <div class="header-actions">
+      @if (angebot?.id) {
+        <button type="button" class="btn-pdf" (click)="exportPdf()">PDF</button>
+      }
+    </div>
+  </header>
+
+  <!-- KI-Generierung Panel (nur bei Neu) -->
+  @if (isNeu()) {
+    <section class="ki-panel">
+      <h2 class="section-title">KI-Angebot aus Notiz erstellen</h2>
+      <div class="form-group">
+        <label class="form-label">Notiz auswählen</label>
+        <select class="form-input" [(ngModel)]="ausgewaehlteNotizId" name="notizId">
+          <option value="">— Notiz wählen —</option>
+          @for (notiz of notizStore.notizen(); track notiz.id) {
+            <option [value]="notiz.id">{{ notiz.titel || notiz.freitext?.substring(0, 50) }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kunde (Firma) *</label>
+        <input type="text" class="form-input" [(ngModel)]="kundeFirma" name="kundeFirma" placeholder="Musterfirma GmbH" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ansprechpartner</label>
+        <input type="text" class="form-input" [(ngModel)]="kundeAnsprechpartner" name="kundeAp" placeholder="Max Mustermann" />
+      </div>
+      <button
+        type="button"
+        class="btn-ki"
+        (click)="generiereAusNotiz()"
+        [disabled]="!ausgewaehlteNotizId || !kundeFirma.trim() || store.isGenerating()"
+      >
+        @if (store.isGenerating()) {
+          <span class="spinner-small"></span> KI generiert…
+        } @else {
+          🤖 KI-Angebot generieren
+        }
+      </button>
+      <p class="ki-hint">— oder manuell befüllen —</p>
+    </section>
+  }
+
+  @if (angebot) {
+    <!-- Grunddaten -->
+    <section class="section">
+      <h2 class="section-title">Grunddaten</h2>
+      <div class="form-group">
+        <label class="form-label">Titel</label>
+        <input type="text" class="form-input" [(ngModel)]="angebot.titel" name="titel" placeholder="Angebotsbeschreibung" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">MwSt %</label>
+          <input type="number" class="form-input" [(ngModel)]="angebot.mwst_prozent" name="mwst" min="0" max="100" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zahlungsziel (Tage)</label>
+          <input type="number" class="form-input" [(ngModel)]="angebot.zahlungsziel_tage" name="zahlungsziel" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Positionen -->
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">Positionen</h2>
+        <button type="button" class="btn-add-pos" (click)="addPosition()">+ Position</button>
+      </div>
+
+      @if (angebot.positionen.length === 0) {
+        <p class="empty-pos">Noch keine Positionen. KI nutzen oder manuell hinzufügen.</p>
+      } @else {
+        <div class="positionen-liste">
+          @for (pos of angebot.positionen; track pos.id) {
+            <div class="position-card">
+              <div class="pos-nr">{{ pos.pos_nr }}</div>
+              <div class="pos-body">
+                <input
+                  type="text"
+                  class="pos-bezeichnung"
+                  [value]="pos.bezeichnung"
+                  (input)="updatePosition(pos.id, 'bezeichnung', $any($event.target).value)"
+                  placeholder="Bezeichnung"
+                />
+                @if (pos.artnr) {
+                  <span class="pos-artnr">Art-Nr.: {{ pos.artnr }}</span>
+                }
+                @if (pos.foerdermittel_hinweis) {
+                  <span class="foerdermittel-badge">{{ pos.foerdermittel_hinweis }}</span>
+                }
+                <div class="pos-preisreihe">
+                  <input
+                    type="number"
+                    class="pos-menge"
+                    [value]="pos.menge"
+                    (change)="updatePosition(pos.id, 'menge', +$any($event.target).value)"
+                    min="0"
+                  />
+                  <input
+                    type="text"
+                    class="pos-einheit"
+                    [value]="pos.einheit"
+                    (input)="updatePosition(pos.id, 'einheit', $any($event.target).value)"
+                  />
+                  <input
+                    type="number"
+                    class="pos-preis"
+                    [value]="pos.einzelpreis"
+                    (change)="updatePosition(pos.id, 'einzelpreis', +$any($event.target).value)"
+                    step="0.01"
+                    min="0"
+                  />
+                  <span class="pos-gesamt">{{ formatEuro(pos.gesamtpreis) }}</span>
+                </div>
+              </div>
+              <button type="button" class="btn-remove-pos" (click)="removePosition(pos.id)">✕</button>
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Summen -->
+    <section class="section summen-section">
+      <div class="summen-row"><span>Netto</span><span>{{ formatEuro(angebot.nettobetrag) }}</span></div>
+      <div class="summen-row"><span>MwSt {{ angebot.mwst_prozent }}%</span><span>{{ formatEuro(angebot.mwst_betrag) }}</span></div>
+      <div class="summen-row brutto"><span>Gesamt (Brutto)</span><span>{{ formatEuro(angebot.bruttobetrag) }}</span></div>
+    </section>
+
+    <!-- Freitexte -->
+    <section class="section">
+      <h2 class="section-title">Freitexte</h2>
+      <div class="form-group">
+        <label class="form-label">Kopftext</label>
+        <textarea class="form-input form-textarea" [(ngModel)]="angebot.freitext_kopf" name="kopf" rows="3" placeholder="Einleitungstext…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fußtext</label>
+        <textarea class="form-input form-textarea" [(ngModel)]="angebot.freitext_fuss" name="fuss" rows="3" placeholder="Abschlusstext, Hinweise…"></textarea>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" (click)="speichern()" [disabled]="isSaving()">
+        {{ isSaving() ? 'Speichern…' : 'Speichern' }}
+      </button>
+    </div>
+  }
+</div>

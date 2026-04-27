@@ -1,0 +1,49 @@
+<div class="chat-page">
+  <header class="chat-header">
+    <h1 class="chat-title">Wissensdatenbank</h1>
+    @if (store.hatNachrichten()) {
+      <button type="button" class="btn-neu" (click)="neueUnterhaltung()">Neu</button>
+    }
+  </header>
+
+  <div class="message-container" #messageContainer>
+    @if (!store.hatNachrichten()) {
+      <div class="empty-state">
+        <span class="empty-icon">🔍</span>
+        <p class="empty-title">Stell eine Frage</p>
+        <p class="empty-hint">z. B. „Welche Wärmepumpe für 150 m²?" oder „Druckverlust Heizkreis"</p>
+      </div>
+    } @else {
+      <div class="message-list">
+        @for (msg of store.nachrichten(); track msg.id) {
+          <app-chat-bubble [message]="msg" />
+        }
+      </div>
+    }
+  </div>
+
+  <footer class="chat-footer">
+    <div class="input-row">
+      <textarea
+        class="frage-input"
+        [(ngModel)]="frageText"
+        (keydown)="onKeydown($event)"
+        placeholder="Frage eingeben… (Enter zum Senden)"
+        rows="1"
+        [disabled]="store.isStreaming()"
+      ></textarea>
+      <button
+        type="button"
+        class="btn-senden"
+        (click)="onSenden()"
+        [disabled]="!frageText().trim() || store.isStreaming()"
+      >
+        @if (store.isStreaming()) {
+          <span class="spinner-small"></span>
+        } @else {
+          ›
+        }
+      </button>
+    </div>
+  </footer>
+</div>

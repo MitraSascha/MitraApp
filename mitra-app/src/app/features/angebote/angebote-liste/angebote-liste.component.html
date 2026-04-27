@@ -1,0 +1,49 @@
+<div class="angebote-liste">
+  <header class="liste-header">
+    <h1 class="liste-title">Angebote</h1>
+    <button type="button" class="btn-add" (click)="openNeu()">+ Neu</button>
+  </header>
+
+  <div class="tab-bar">
+    <button
+      class="tab-btn"
+      [class.active]="aktuellerTab() === 'entwuerfe'"
+      (click)="setTab('entwuerfe')"
+    >Entwürfe ({{ store.entwuerfe().length }})</button>
+    <button
+      class="tab-btn"
+      [class.active]="aktuellerTab() === 'gesendet'"
+      (click)="setTab('gesendet')"
+    >Gesendet ({{ store.gesendete().length }})</button>
+    <button
+      class="tab-btn"
+      [class.active]="aktuellerTab() === 'abgeschlossen'"
+      (click)="setTab('abgeschlossen')"
+    >Abgeschlossen ({{ store.abgeschlossene().length }})</button>
+  </div>
+
+  @if (store.isLoading()) {
+    <div class="loading">Laden…</div>
+  } @else if (aktuelleAngebote.length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">📄</span>
+      <p>Keine Angebote in dieser Kategorie</p>
+    </div>
+  } @else {
+    <ul class="angebot-list">
+      @for (angebot of aktuelleAngebote; track angebot.id) {
+        <li class="angebot-card" (click)="openDetail(angebot.id)">
+          <div class="angebot-info">
+            <span class="angebot-nr">{{ angebot.angebotsnummer }}</span>
+            <span class="angebot-kunde">{{ angebot.kunde.firma }}</span>
+            <span class="angebot-titel">{{ angebot.titel }}</span>
+          </div>
+          <div class="angebot-meta">
+            <span class="angebot-betrag">{{ formatEuro(angebot.bruttobetrag) }}</span>
+            <span class="status-badge status-{{ angebot.status }}">{{ statusLabel(angebot.status) }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

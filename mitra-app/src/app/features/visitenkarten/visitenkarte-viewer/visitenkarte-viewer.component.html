@@ -1,0 +1,25 @@
+<div class="viewer-wrapper">
+  <model-viewer
+    src="assets/models/Visitenkarte.glb"
+    auto-rotate
+    camera-controls
+    shadow-intensity="0.5"
+    style="width: 100%; height: 220px; background: #2D333B; border-radius: 8px;"
+  >
+    @if (fotoUrl) {
+      <img
+        slot="poster"
+        [src]="fotoUrl"
+        [alt]="firma"
+        style="width: 100%; height: 100%; object-fit: cover;"
+      />
+    }
+  </model-viewer>
+
+  @if (!fotoUrl) {
+    <div class="viewer-placeholder">
+      <span class="placeholder-icon">🃏</span>
+      <span class="placeholder-text">Kein Foto</span>
+    </div>
+  }
+</div>

@@ -1,0 +1,86 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: var(--z-modal);
+  padding: var(--sp-3);
+  backdrop-filter: blur(4px);
+}
+
+.dialog {
+  background: var(--bg-2);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-5);
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: var(--sp-2);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.dialog-title {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--sp-4);
+}
+
+.section {
+  margin-bottom: var(--sp-4);
+}
+
+.section-label {
+  color: var(--text-tertiary);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.chip {
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all var(--t-fast);
+  min-height: 44px;
+
+  &:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+.create-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 14px 0;
+  color: #000;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: var(--sp-2);
+  transition: opacity var(--t-fast), transform var(--t-spring);
+
+  &:hover  { opacity: 0.88; }
+  &:active { transform: scale(0.98); }
+}

@@ -1,0 +1,47 @@
+<div class="visitenkarten-liste">
+  <header class="liste-header">
+    <h1 class="liste-title">Visitenkarten</h1>
+    <button type="button" class="btn-add" (click)="openNeu()">+ Neu</button>
+  </header>
+
+  <div class="search-bar">
+    <input
+      type="search"
+      class="search-input"
+      placeholder="Firma, Name oder Tag suchen…"
+      [ngModel]="store.searchQuery()"
+      (ngModelChange)="onSearch($event)"
+    />
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading">Laden…</div>
+  } @else if (store.gefilterteKontakte().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🪪</span>
+      <p>Noch keine Visitenkarten</p>
+      <button type="button" class="btn-primary" (click)="openNeu()">Erste Visitenkarte scannen</button>
+    </div>
+  } @else {
+    <ul class="kontakt-list">
+      @for (kontakt of store.gefilterteKontakte(); track kontakt.id) {
+        <li class="kontakt-card" (click)="openDetail(kontakt.id)">
+          <div class="kontakt-info">
+            <span class="kontakt-firma">{{ kontakt.firma }}</span>
+            @if (kontakt.ansprechpartner) {
+              <span class="kontakt-person">{{ kontakt.ansprechpartner }}</span>
+            }
+            @if (kontakt.tags && kontakt.tags.length > 0) {
+              <div class="kontakt-tags">
+                @for (tag of kontakt.tags; track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+              </div>
+            }
+          </div>
+          <span class="chevron">›</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

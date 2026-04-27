@@ -1,0 +1,53 @@
+<div class="termin-detail">
+  <header class="detail-header">
+    <a routerLink="/termine" class="btn-back">← Zurück</a>
+    <h1>{{ isNeu() ? 'Neuer Termin' : 'Termin bearbeiten' }}</h1>
+    <div class="header-actions">
+      @if (!isNeu()) {
+        <button class="btn-delete" (click)="loesche()">Löschen</button>
+      }
+      <button class="btn-save" [disabled]="!titel().trim() || isSaving()" (click)="speichern()">
+        {{ isSaving() ? 'Speichern...' : 'Speichern' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="detail-body">
+    <div class="form-group">
+      <label>Titel</label>
+      <input type="text" [ngModel]="titel()" (ngModelChange)="titel.set($event)" placeholder="Terminbezeichnung" />
+    </div>
+
+    <div class="form-group">
+      <label>Typ</label>
+      <div class="typ-chips">
+        @for (opt of typOptionen; track opt.value) {
+          <button type="button" class="typ-chip" [class.active]="typ() === opt.value" (click)="typ.set(opt.value)">
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Beginn</label>
+        <input type="datetime-local" [ngModel]="beginn()" (ngModelChange)="beginn.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Ende</label>
+        <input type="datetime-local" [ngModel]="ende()" (ngModelChange)="ende.set($event)" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Beschreibung</label>
+      <textarea [ngModel]="beschreibung()" (ngModelChange)="beschreibung.set($event)" rows="4" placeholder="Optionale Notizen zum Termin"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Erinnerung (Minuten vorher)</label>
+      <input type="number" [ngModel]="erinnerungMinuten()" (ngModelChange)="erinnerungMinuten.set(+$event)" min="0" max="1440" />
+    </div>
+  </div>
+</div>

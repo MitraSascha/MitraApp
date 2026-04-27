@@ -1,0 +1,12 @@
+<nav class="bottom-nav">
+  @for (item of navItems; track item.path) {
+    <button
+      class="nav-item"
+      [class.active]="isActive(item.path)"
+      (click)="navigate(item.path)"
+    >
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span class="nav-label">{{ item.label }}</span>
+    </button>
+  }
+</nav>

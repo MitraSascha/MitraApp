@@ -1,0 +1,16 @@
+<div class="bubble" [class.user]="message.role === 'user'" [class.assistant]="message.role === 'assistant'" [class.streaming]="message.status === 'streaming'" [class.error]="message.status === 'error'">
+  <div class="bubble-content">
+    {{ message.content }}
+    @if (message.status === 'streaming') {
+      <span class="cursor">▍</span>
+    }
+  </div>
+  @if (message.quellen && message.quellen.length > 0) {
+    <div class="quellen">
+      <span class="quellen-label">Quellen:</span>
+      @for (q of message.quellen; track q.dokument) {
+        <span class="quelle-pill" [title]="q.snippet">{{ q.dokument }}</span>
+      }
+    </div>
+  }
+</div>

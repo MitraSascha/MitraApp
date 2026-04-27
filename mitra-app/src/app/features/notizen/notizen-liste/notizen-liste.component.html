@@ -1,0 +1,140 @@
+<div class="app">
+
+  <!-- ── Sticky Header ──────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-inner">
+      <span class="app-titel">Notizen</span>
+
+      <div class="suche-wrap">
+        <span class="suche-icon" aria-hidden="true">⌕</span>
+        <input class="suche-input"
+          type="search"
+          inputmode="search"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          [value]="suche()"
+          (input)="suche.set($any($event.target).value)"
+          placeholder="Suchen…"
+          aria-label="Notizen durchsuchen" />
+        @if (suche()) {
+          <button class="suche-loeschen" (click)="suche.set('')" aria-label="Suche leeren">×</button>
+        }
+      </div>
+
+      <div class="header-aktionen">
+        <button class="btn-filter"
+          [class.aktiv]="zeigeFilter() || hatAktiveFilter()"
+          (click)="zeigeFilter.set(!zeigeFilter())"
+          aria-label="Filter anzeigen"
+          [attr.aria-expanded]="zeigeFilter()">
+          ⊟
+          @if (hatAktiveFilter()) {
+            <span class="filter-punkt" aria-hidden="true"></span>
+          }
+        </button>
+        <button class="btn-neu" (click)="zeigeNeuDialog.set(true)">+ Neu</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Filter-Drawer ──────────────────────────────────────────────────── -->
+  @if (zeigeFilter()) {
+    <div class="filter-drawer" role="search" aria-label="Notizen filtern">
+      <div class="filter-drawer-inner">
+
+        <div class="filter-gruppe" role="group" aria-label="Von wem">
+          <span class="filter-label">Von wem</span>
+          <div class="filter-chips">
+            <button class="filter-chip"
+              [class.aktiv]="filterVonwem() === 'alle'"
+              (click)="filterVonwem.set('alle')">Alle</button>
+            @for (e of vonwemEntries; track e[0]) {
+              <button class="filter-chip"
+                [class.aktiv]="filterVonwem() === e[0]"
+                [style.--chip-farbe]="e[1].color"
+                (click)="filterVonwem.set(filterVonwem() === e[0] ? 'alle' : $any(e[0]))">
+                {{ e[1].icon }} {{ e[1].label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-gruppe" role="group" aria-label="Thema">
+          <span class="filter-label">Thema</span>
+          <div class="filter-chips">
+            @for (e of topicsEntries; track e[0]) {
+              <button class="filter-chip"
+                [class.aktiv]="filterTopic() === e[0]"
+                [style.--chip-farbe]="e[1].color"
+                (click)="filterTopic.set(filterTopic() === e[0] ? 'alle' : $any(e[0]))">
+                {{ e[1].icon }} {{ e[1].label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="filter-gruppe" role="group" aria-label="Status">
+          <span class="filter-label">Status</span>
+          <div class="filter-chips">
+            @for (s of [['alle','Alle'],['offen','○ Offen'],['in_bearbeitung','◐ Läuft'],['erledigt','● Erledigt']]; track s[0]) {
+              <button class="filter-chip"
+                [class.aktiv]="filterStatus() === s[0]"
+                [style.--chip-farbe]="statusFarbe(s[0])"
+                (click)="filterStatus.set(filterStatus() === s[0] && s[0] !== 'alle' ? 'alle' : $any(s[0]))">
+                {{ s[1] }}
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (hatAktiveFilter()) {
+          <button class="loeschen-btn" (click)="filterLoeschen()">✕ Alle Filter löschen</button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── Liste ──────────────────────────────────────────────────────────── -->
+  <div class="liste">
+    @if (store.isLoading()) {
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-karte">
+          <div class="sk-badges">
+            <div class="sk-badge"></div>
+            <div class="sk-badge kurz"></div>
+          </div>
+          <div class="sk-zeile lang"></div>
+          <div class="sk-zeile mittel"></div>
+        </div>
+      }
+    } @else if (gefiltriert().length === 0) {
+      <div class="leer">
+        @if (hatAktiveFilter()) {
+          <div class="leer-icon">◎</div>
+          <div>Keine Treffer für diese Filter.</div>
+          <button class="leer-aktion" (click)="filterLoeschen()">Filter zurücksetzen</button>
+        } @else {
+          <div class="leer-icon">🔧</div>
+          <div class="leer-titel">Noch keine Notizen</div>
+          <div class="leer-hinweis">Tippe auf <span class="akzent">+ Neu</span> um loszulegen</div>
+        }
+      </div>
+    } @else {
+      @for (notiz of gefiltriert(); track notiz.id; let idx = $index) {
+        <app-notiz-karte
+          [notiz]="notiz"
+          [defaultOpen]="istErsteLeer(notiz, idx)"
+          (updated)="notizAktualisieren($event)"
+          (deleted)="notizLoeschen(notiz.id)" />
+      }
+    }
+  </div>
+
+  @if (zeigeNeuDialog()) {
+    <app-neue-notiz-dialog
+      (created)="notizErstellen($event)"
+      (closed)="zeigeNeuDialog.set(false)" />
+  }
+</div>

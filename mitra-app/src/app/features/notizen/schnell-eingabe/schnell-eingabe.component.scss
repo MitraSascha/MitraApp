@@ -1,0 +1,95 @@
+.schnell-eingabe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.row {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: stretch;
+}
+
+select {
+  flex-shrink: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--t-fast);
+  max-width: 110px;
+
+  option { background: var(--bg-2); color: var(--text-primary); }
+
+  &:focus { outline: none; border-color: var(--border-accent); }
+}
+
+.input-row {
+  display: flex;
+  flex: 1;
+  gap: var(--sp-2);
+
+  input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: border-color var(--t-fast), box-shadow var(--t-fast);
+
+    &::placeholder { color: var(--text-disabled); }
+
+    &:focus {
+      outline: none;
+      border-color: var(--border-accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+  }
+
+  button {
+    width: 40px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #000;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity var(--t-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover  { opacity: 0.8; }
+    &:active { transform: scale(0.95); }
+  }
+}
+
+.hersteller-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: var(--sp-1);
+}
+
+.h-chip {
+  border: 1px solid;
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+
+  &.selected { font-weight: 700; }
+}

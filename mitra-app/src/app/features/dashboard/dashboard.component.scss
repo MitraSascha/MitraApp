@@ -1,0 +1,189 @@
+.dashboard {
+  padding: var(--spacing-md);
+  padding-bottom: 80px; // Platz für Bottom-Nav
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.dash-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.dash-greeting {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  h1 {
+    font-family: var(--font-headline);
+    font-size: 1.5rem;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+}
+
+.sync-badge {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  font-family: var(--font-mono);
+}
+
+.dash-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+
+  h2 {
+    font-family: var(--font-headline);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+.link-mehr {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+.empty-card {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.termine-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.termin-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  border-left: 3px solid transparent;
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-decoration: none;
+  color: inherit;
+
+  &.typ-notdienst { border-left-color: var(--color-danger); }
+  &.typ-aufmass { border-left-color: var(--color-accent); }
+  &.typ-wartung { border-left-color: var(--color-warning); }
+
+  &:hover { opacity: 0.85; }
+}
+
+.termin-zeit {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  min-width: 50px;
+}
+
+.termin-titel {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.notdienst-badge {
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.aufgaben-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.aufgabe-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+
+  &:last-child { border-bottom: none; }
+}
+
+.aufgabe-check {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+.aufgabe-text {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+}
+
+.aufgabe-hersteller {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  background: rgba(232,112,10,0.12);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.mehr-hint {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-sm);
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--spacing-md) var(--spacing-sm);
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  min-height: var(--touch-target);
+  justify-content: center;
+  transition: all 0.15s;
+
+  span:first-child { font-size: 1.3rem; }
+
+  &:hover {
+    color: var(--color-text-primary);
+    background: rgba(232,112,10,0.1);
+  }
+}

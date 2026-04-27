@@ -1,0 +1,17 @@
+<div class="hersteller-container">
+  @for (kat of kategorien; track kat.label) {
+    <div class="kategorie-gruppe">
+      <span class="kategorie-label">{{ kat.label }}</span>
+      <div class="pills">
+        @for (h of kat.hersteller; track h) {
+          <button
+            type="button"
+            class="pill"
+            [class.active]="isSelected(h)"
+            (click)="toggle(h)"
+          >{{ h }}</button>
+        }
+      </div>
+    </div>
+  }
+</div>

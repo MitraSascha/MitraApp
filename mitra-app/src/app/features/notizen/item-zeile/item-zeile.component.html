@@ -1,0 +1,23 @@
+<div class="item-row">
+  <span class="cat-badge" [style.color]="catConfig.color" [style.border-color]="catConfig.color + '44'">
+    {{ catConfig.label }}
+  </span>
+
+  <div class="item-content">
+    @if (item().hersteller) {
+      <span class="hersteller">{{ item().hersteller }}</span>
+    }
+    <span
+      class="item-text"
+      contenteditable="true"
+      [textContent]="item().text"
+      (blur)="onTextBlur($event)"
+      (keydown)="onTextKeydown($event)"
+      role="textbox"
+      aria-multiline="false"
+      [attr.aria-label]="'Eintrag: ' + item().text">
+    </span>
+  </div>
+
+  <button class="delete-btn" (click)="deleted.emit()" aria-label="Eintrag löschen">×</button>
+</div>

@@ -1,0 +1,69 @@
+<div class="freitext-eingabe">
+  @if (!vorschlaege()) {
+    <!-- Texteingabe -->
+    <div class="input-area">
+      <textarea
+        [value]="text()"
+        (input)="text.set($any($event.target).value)"
+        placeholder="Gesprächsmemo, Aufmaß oder freier Text… KI strukturiert es danach."
+        rows="4"
+        aria-label="Freitext eingeben"></textarea>
+
+      <div class="input-actions">
+        <app-diktier-button (transkriptFertig)="onTranskript($event)" />
+        <button
+          class="analyse-btn"
+          [disabled]="!text().trim() || loading()"
+          (click)="analysieren()">
+          @if (loading()) { ⟳ Analysiere… }
+          @else { ✦ KI-Analyse }
+        </button>
+      </div>
+    </div>
+
+    @if (fehler()) {
+      <div class="fehler">⚠ {{ fehler() }}</div>
+    }
+  } @else {
+    <!-- Vorschläge -->
+    @if (summary()) {
+      <div class="summary-box">{{ summary() }}</div>
+    }
+
+    <div class="vorschlaege">
+      @for (item of vorschlaege()!; track item.id) {
+        <div class="vorschlag" [class.abgelehnt]="entscheidungen()[item.id] === false">
+          <button
+            class="toggle-btn"
+            [class.an]="entscheidungen()[item.id] !== false"
+            (click)="setEntscheidung(item.id, entscheidungen()[item.id] === false)"
+            [attr.aria-label]="entscheidungen()[item.id] === false ? 'Akzeptieren' : 'Ablehnen'">
+            {{ entscheidungen()[item.id] === false ? '○' : '●' }}
+          </button>
+
+          <span class="cat-badge"
+            [style.color]="getCatConfig(item.typ).color"
+            [style.border-color]="getCatConfig(item.typ).color + '44'">
+            {{ getCatConfig(item.typ).label }}
+          </span>
+
+          @if (item.hersteller) {
+            <span class="hersteller">{{ item.hersteller }}</span>
+          }
+
+          <span class="item-text">{{ item.text }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="vorschlag-actions">
+      <button class="accept-all-btn" (click)="alleAkzeptieren()">Alle ✓</button>
+      <button
+        class="bestaetigen-btn"
+        [disabled]="angenommeneAnzahl === 0"
+        (click)="bestaetigen()">
+        {{ angenommeneAnzahl }} Einträge übernehmen →
+      </button>
+    </div>
+  }
+</div>

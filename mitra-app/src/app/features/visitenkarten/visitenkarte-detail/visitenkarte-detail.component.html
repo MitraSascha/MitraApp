@@ -1,0 +1,95 @@
+<div class="visitenkarte-detail">
+  <header class="detail-header">
+    <button type="button" class="btn-back" (click)="zurueck()">‹</button>
+    <h1 class="detail-title">{{ isNeu() ? 'Neue Visitenkarte' : firma || 'Kontakt' }}</h1>
+    @if (!isNeu()) {
+      <button type="button" class="btn-delete" (click)="loeschen()">🗑</button>
+    }
+  </header>
+
+  <!-- Foto-Upload -->
+  <section class="section">
+    <app-foto-upload (fotoAusgelesen)="onFotoAusgelesen($event)" />
+  </section>
+
+  <!-- 3D-Viewer Toggle -->
+  @if (fotoUrl || firma) {
+    <section class="section">
+      <button type="button" class="btn-viewer-toggle" (click)="toggleViewer()">
+        {{ showViewer() ? '3D ausblenden' : '3D Visitenkarte anzeigen' }}
+      </button>
+      @if (showViewer()) {
+        <div class="viewer-wrapper">
+          <app-visitenkarte-viewer [fotoUrl]="fotoUrl" [firma]="firma" />
+        </div>
+      }
+    </section>
+  }
+
+  <!-- Formular -->
+  <form class="kontakt-form" (ngSubmit)="speichern()">
+    <div class="form-group">
+      <label class="form-label">Firma *</label>
+      <input type="text" class="form-input" [(ngModel)]="firma" name="firma" required placeholder="Firmenname" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Ansprechpartner</label>
+      <input type="text" class="form-input" [(ngModel)]="ansprechpartner" name="ansprechpartner" placeholder="Vor- und Nachname" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Position</label>
+      <input type="text" class="form-input" [(ngModel)]="position" name="position" placeholder="Geschäftsführer, Einkäufer…" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Mobil</label>
+        <input type="tel" class="form-input" [(ngModel)]="mobil" name="mobil" placeholder="+49 170…" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input type="tel" class="form-input" [(ngModel)]="telefon" name="telefon" placeholder="+49 89…" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">E-Mail</label>
+      <input type="email" class="form-input" [(ngModel)]="email" name="email" placeholder="info@firma.de" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Website</label>
+      <input type="url" class="form-input" [(ngModel)]="website" name="website" placeholder="https://firma.de" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Branche</label>
+      <input type="text" class="form-input" [(ngModel)]="branche" name="branche" placeholder="SHK, Heizungsbau…" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tags <span class="hint">(kommagetrennt)</span></label>
+      <input type="text" class="form-input" [(ngModel)]="tagsRaw" name="tagsRaw" placeholder="Lieferant, Partner, VIP" />
+    </div>
+
+    <div class="form-group form-checkbox">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="istLieferant" name="istLieferant" />
+        <span>Ist Lieferant</span>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Notiz</label>
+      <textarea class="form-input form-textarea" [(ngModel)]="notiz" name="notiz" rows="3" placeholder="Interne Notizen…"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="isSaving() || !firma.trim()">
+        {{ isSaving() ? 'Speichern…' : 'Speichern' }}
+      </button>
+    </div>
+  </form>
+</div>

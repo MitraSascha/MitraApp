@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'IBM Plex Sans', Arial, sans-serif; font-size: 10pt; color: #1C2128; background: #fff; }
+
+    .page { padding: 30mm 25mm; min-height: 297mm; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20mm; }
+    .firma-name { font-size: 22pt; font-weight: 700; color: #1C2128; }
+    .firma-sub { font-size: 9pt; color: #768390; margin-top: 3px; }
+    .angebots-nr { text-align: right; }
+    .angebots-nr-label { font-size: 9pt; color: #768390; }
+    .angebots-nr-wert { font-size: 14pt; font-weight: 700; color: #E8700A; }
+
+    /* Adressblock */
+    .adressblock { margin-bottom: 12mm; }
+    .adress-label { font-size: 7pt; color: #768390; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+    .adress-firma { font-size: 11pt; font-weight: 600; }
+    .adress-ap { font-size: 10pt; color: #444; }
+    .adress-zeile { font-size: 9pt; color: #555; }
+
+    /* Betreff / Datum */
+    .meta-row { display: flex; justify-content: space-between; margin-bottom: 8mm; }
+    .betreff { font-size: 12pt; font-weight: 700; }
+    .datum-block { text-align: right; font-size: 9pt; color: #555; }
+
+    /* Freitext */
+    .freitext { font-size: 9.5pt; margin-bottom: 6mm; line-height: 1.5; }
+
+    /* Tabelle */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 6mm; }
+    thead tr { background: #1C2128; color: #fff; }
+    thead th { padding: 5px 8px; text-align: left; font-size: 9pt; font-weight: 600; }
+    thead th.r { text-align: right; }
+    tbody tr:nth-child(even) { background: #F5F5F5; }
+    tbody td { padding: 5px 8px; font-size: 9pt; vertical-align: top; }
+    tbody td.r { text-align: right; }
+    .foerdermittel { font-size: 7pt; color: #57AB5A; font-weight: 600; }
+
+    /* Summen */
+    .summen { margin-left: auto; width: 200px; margin-bottom: 8mm; }
+    .summen-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 9.5pt; }
+    .summen-row.brutto { font-size: 11pt; font-weight: 700; border-top: 2px solid #1C2128; margin-top: 4px; padding-top: 6px; }
+
+    /* Fußtext */
+    .fusstext { font-size: 9pt; color: #555; margin-bottom: 8mm; line-height: 1.5; }
+
+    /* Footer */
+    .footer { border-top: 1px solid #DDD; padding-top: 5mm; font-size: 8pt; color: #888; display: flex; justify-content: space-between; }
+
+    .accent { color: #E8700A; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="firma-name">Pironi <span class="accent">SHK</span></div>
+      <div class="firma-sub">Sanitär · Heizung · Klima</div>
+    </div>
+    <div class="angebots-nr">
+      <div class="angebots-nr-label">ANGEBOT</div>
+      <div class="angebots-nr-wert">{{ angebot.angebotsnummer }}</div>
+      <div class="datum-block">Datum: {{ datum }}</div>
+    </div>
+  </div>
+
+  <!-- Adresse -->
+  <div class="adressblock">
+    <div class="adress-label">An</div>
+    <div class="adress-firma">{{ angebot.kunde.firma }}</div>
+    {% if angebot.kunde.ansprechpartner %}
+    <div class="adress-ap">z. H. {{ angebot.kunde.ansprechpartner }}</div>
+    {% endif %}
+    {% if angebot.kunde.adresse %}
+    <div class="adress-zeile">{{ angebot.kunde.adresse.strasse|default:"" }} {{ angebot.kunde.adresse.hausnummer|default:"" }}</div>
+    <div class="adress-zeile">{{ angebot.kunde.adresse.plz|default:"" }} {{ angebot.kunde.adresse.ort|default:"" }}</div>
+    {% endif %}
+  </div>
+
+  <!-- Betreff -->
+  <div class="meta-row">
+    <div class="betreff">{{ angebot.titel }}</div>
+    <div>
+      <div class="datum-block">Gültig bis: {{ gueltig_bis }}</div>
+      <div class="datum-block">Zahlungsziel: {{ angebot.zahlungsziel_tage }} Tage</div>
+    </div>
+  </div>
+
+  <!-- Freitext Kopf -->
+  {% if angebot.freitext_kopf %}
+  <div class="freitext">{{ angebot.freitext_kopf }}</div>
+  {% endif %}
+
+  <!-- Positionen -->
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30px">Pos.</th>
+        <th style="width: 80px">Art-Nr.</th>
+        <th>Bezeichnung</th>
+        <th class="r" style="width: 50px">Menge</th>
+        <th class="r" style="width: 40px">Einh.</th>
+        <th class="r" style="width: 70px">Einzelpreis</th>
+        <th class="r" style="width: 80px">Gesamtpreis</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pos in angebot.positionen %}
+      <tr>
+        <td>{{ pos.pos_nr }}</td>
+        <td>{{ pos.artnr|default:"—" }}</td>
+        <td>
+          {{ pos.bezeichnung }}
+          {% if pos.foerdermittel_hinweis %}
+          <br/><span class="foerdermittel">★ {{ pos.foerdermittel_hinweis }}</span>
+          {% endif %}
+        </td>
+        <td class="r">{{ pos.menge }}</td>
+        <td class="r">{{ pos.einheit }}</td>
+        <td class="r">{{ pos.einzelpreis|floatformat:2 }} €</td>
+        <td class="r">{{ pos.gesamtpreis|floatformat:2 }} €</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Summen -->
+  <div class="summen">
+    <div class="summen-row"><span>Nettobetrag</span><span>{{ angebot.nettobetrag|floatformat:2 }} €</span></div>
+    <div class="summen-row"><span>MwSt. {{ angebot.mwst_prozent }} %</span><span>{{ angebot.mwst_betrag|floatformat:2 }} €</span></div>
+    <div class="summen-row brutto"><span>Gesamtbetrag</span><span>{{ angebot.bruttobetrag|floatformat:2 }} €</span></div>
+  </div>
+
+  <!-- Freitext Fuß -->
+  {% if angebot.freitext_fuss %}
+  <div class="fusstext">{{ angebot.freitext_fuss }}</div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Pironi SHK | Musterstraße 1 | 12345 Musterstadt</span>
+    <span>Tel: +49 89 123456 | info@pironi-shk.de</span>
+    <span>{{ angebot.angebotsnummer }}</span>
+  </div>
+</div>
+</body>
+</html>

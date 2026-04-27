@@ -1,0 +1,22 @@
+.viewer-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.viewer-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+
+  .placeholder-icon { font-size: 2rem; }
+  .placeholder-text { font-size: 0.875rem; }
+}
