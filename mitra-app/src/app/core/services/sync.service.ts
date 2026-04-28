@@ -79,10 +79,18 @@ export class SyncService {
         .sortBy('[priority+created_at]');
 
       for (const item of items) {
-        const ok = await this.syncEntity(item);
-        if (ok) {
+        const result_entity = await this.syncEntity(item);
+        if (result_entity === true) {
           await this.db.sync_queue.update(item.id!, { status: 'completed' });
           result.synced_count++;
+        } else if (result_entity === 'dead') {
+          // 4xx-Fehler: Payload ist dauerhaft invalid — sofort als failed markieren
+          await this.db.sync_queue.update(item.id!, {
+            status: 'failed',
+            attempts: item.attempts + 1,
+            last_attempt_at: Date.now(),
+          });
+          result.failed_count++;
         } else {
           await this.db.sync_queue.update(item.id!, {
             status: item.attempts >= 3 ? 'failed' : 'pending',
@@ -120,7 +128,7 @@ export class SyncService {
     this._pendingCount.set(count);
   }
 
-  private async syncEntity(item: SyncQueueItem): Promise<boolean> {
+  private async syncEntity(item: SyncQueueItem): Promise<boolean | 'dead'> {
     const pathMap: Record<string, string> = {
       notiz: '/notizen/',
       termin: '/termine/',
@@ -139,7 +147,16 @@ export class SyncService {
         await this.api.delete(`${basePath}${item.entity_id}/`).toPromise();
       }
       return true;
-    } catch {
+    } catch (err: unknown) {
+      const httpErr = err as { status?: number; error?: unknown };
+      if (httpErr?.status && httpErr.status >= 400 && httpErr.status < 500) {
+        console.error(
+          `[Sync] ${httpErr.status} auf ${item.entity_type}/${item.entity_id}:`,
+          JSON.stringify(httpErr.error, null, 2),
+          '\nPayload:', item.payload,
+        );
+        return 'dead';  // Client-Fehler — kein Retry sinnvoll
+      }
       return false;
     }
   }

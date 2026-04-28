@@ -1,6 +1,6 @@
 ---
 type: project
-updated: 2026-04-26
+updated: 2026-04-28
 ---
 
 ## Architektur- & Technologieentscheidungen
@@ -27,10 +27,10 @@ updated: 2026-04-26
 ### KI & Externe Services
 | Entscheidung | Gewählt | Begründung |
 |---|---|---|
-| KI-Aufruf | Claude CLI (`claude -p`) in Docker | Token vom Host, kein API-Key im Code |
+| KI-Aufruf | Claude CLI (`claude -p`) in Docker | OAuth-Token vom Host via Volume-Mount, kein API-Key nötig |
+| Vision (Visitenkarten) | Claude CLI mit `@<dateipfad>` Syntax | Bild-Referenz im Prompt, CLI verarbeitet nativ |
 | Wissensdatenbank | RAGflow (Strato-Server) | Bereits eingerichtet |
 | Lokales Modell | Ollama + Qwen2.5 | Bereits eingerichtet, DSGVO-konform |
-| Embeddings | nomic-embed-text via Ollama | Bereits eingerichtet |
 
 ### Infrastruktur
 | Entscheidung | Gewählt | Begründung |
@@ -43,8 +43,64 @@ updated: 2026-04-26
 | Entscheidung | Gewählt | Begründung |
 |---|---|---|
 | Primary Color | Anthrazit `#1C2128` | Handwerk-Ästhetik, Dark Mode |
-| Accent Color | Orange `#E8700A` | Energie, Werkzeugmarken-Ästhetik (DeWalt, Hilti) |
+| Accent Color | Orange `#E8700A` | Energie, Werkzeugmarken-Ästhetik |
 | Font Headlines | IBM Plex Sans | Technisch, klar lesbar auf kleinen Screens |
 | Font Body | Inter | Bewährt für UI |
 | Font Monospace | JetBrains Mono | Artikelnummern, Code |
 | Navigation | Bottom Navigation (Mobile) + Sidebar (Tablet/Desktop) | Mobile-First |
+
+---
+
+## HERO CRM API — Erkenntnisse (2026-04-28)
+
+### Echte GraphQL Feldnamen (per Introspection ermittelt)
+
+```graphql
+# calendar_events Query-Parameter:
+calendar_events(
+  partner_ids: [Int],   # Liste von Partner-IDs (NICHT partner_id: ID!)
+  start: DateTime,      # ISO 8601 mit Timezone z.B. 2026-05-01T00:00:00+02:00
+  end: DateTime,
+  show_deleted: Boolean,
+  ids: [Int],
+  orderBy: String,
+  first: Int,
+  offset: Int
+)
+
+# CalendarEvent Felder:
+id, title, description, start, end, all_day, is_done, deleted,
+category { name }, partners [{ id, name }]
+# NICHT vorhanden: start_at, end_at, status, type, address, customer, partner (singular)
+```
+
+### HERO Timezone-Bug
+HERO gibt Berliner Lokalzeit mit `+00:00` zurück (fälschlicherweise als UTC markiert).
+Fix in `hero_sync.py`: `_fix_hero_datetime()` — parst als naive datetime und lokalisiert als Europe/Berlin.
+
+---
+
+## Claude CLI im Docker — Setup (2026-04-28)
+
+- `~/.claude` ist als read-only Volume gemountet: `C:/Users/sasch/.claude:/root/.claude:ro`
+- Claude CLI kann keine Session/History-Dateien in read-only schreiben → ENOENT-Fehler
+- **Fix:** `_ensure_claude_home()` in `claude_service.py` kopiert `.claude` einmalig nach `/tmp/claude_home/` (beschreibbar)
+- Claude CLI wird mit `HOME=/tmp/claude_home` aufgerufen
+- `@<dateipfad>` Syntax im Prompt für Bild-Referenzen (Vision)
+- `anthropic` Python SDK ist in `requirements.txt` eingetragen (als Fallback / für zukünftige direkte Nutzung)
+
+---
+
+## Timezone-Handling Frontend (2026-04-28)
+
+**Problem:** `new Date().toISOString().slice(0, 10)` gibt UTC-Datum zurück, nicht lokales Datum.
+In CEST (UTC+2) ist Mitternacht lokal = 22:00 UTC Vortag → alle Tages-Keys waren um 1 Tag verschoben.
+
+**Fix:** Lokale Datum-Hilfsfunktion `toLocalDateKey(d: Date)` im TerminStore:
+```typescript
+function toLocalDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+```
+Wird für alle Tages-Vergleiche im Store und der Liste-Komponente verwendet.
+Außerdem: `filter(t => toLocalDateKey(new Date(t.beginn)) === key)` statt `t.beginn.startsWith(key)`.

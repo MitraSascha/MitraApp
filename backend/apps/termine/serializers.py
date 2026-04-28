@@ -10,7 +10,7 @@ class TerminSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'hero_crm_id', 'titel', 'beschreibung', 'typ', 'status',
             'beginn', 'ende', 'ganztaegig', 'adresse', 'kontakt_id',
-            'monteure', 'push_gesendet', 'erinnerung_minuten', 'notiz_id',
+            'monteure', 'push_gesendet', 'erinnerung_minuten', 'erinnerung_ton', 'notiz_id',
             'erstellt_am', 'geaendert_am', 'erstellt_von', 'version', 'sync_status',
         ]
         read_only_fields = ['erstellt_am', 'geaendert_am', 'erstellt_von', 'push_gesendet']

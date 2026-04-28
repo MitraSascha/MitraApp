@@ -1,30 +1,58 @@
 <div class="foto-upload">
-  <input
-    id="foto-input"
-    type="file"
-    accept="image/*"
-    capture="environment"
-    style="display: none"
-    (change)="onFileSelected($event)"
-  />
+  <input id="foto-input-vorderseite" type="file" accept="image/*" capture="environment"
+    style="display: none" (change)="onVorderseitSelected($event)" />
+  <input id="foto-input-rueckseite" type="file" accept="image/*" capture="environment"
+    style="display: none" (change)="onRueckseitSelected($event)" />
 
-  @if (!previewUrl()) {
-    <button type="button" class="upload-area" (click)="openCamera()">
-      <span class="upload-icon">📷</span>
-      <span class="upload-text">Visitenkarte fotografieren</span>
-      <span class="upload-hint">oder aus Galerie wählen</span>
-    </button>
-  } @else {
-    <div class="preview-container">
-      <img [src]="previewUrl()" alt="Visitenkarte" class="preview-img" />
-      @if (isProcessing()) {
-        <div class="processing-overlay">
-          <div class="spinner"></div>
-          <span>KI liest Visitenkarte aus…</span>
+  <div class="seiten-grid">
+    <!-- Vorderseite -->
+    <div class="seite-slot">
+      <span class="seite-label">Vorderseite</span>
+      @if (!previewVorderseite()) {
+        <button type="button" class="upload-area" (click)="openVorderseite()">
+          <span class="upload-icon">📷</span>
+          <span class="upload-text">Foto aufnehmen</span>
+        </button>
+      } @else {
+        <div class="preview-container" (click)="openVorderseite()">
+          <img [src]="previewVorderseite()" alt="Vorderseite" class="preview-img" />
+          <span class="preview-replace-hint">Tippen zum Ändern</span>
         </div>
       }
-      <button type="button" class="btn-neu" (click)="openCamera()">Neues Foto</button>
     </div>
+
+    <!-- Rückseite -->
+    <div class="seite-slot">
+      <span class="seite-label">Rückseite <span class="optional">(optional)</span></span>
+      @if (!previewRueckseite()) {
+        <button type="button" class="upload-area" (click)="openRueckseite()">
+          <span class="upload-icon">📷</span>
+          <span class="upload-text">Foto aufnehmen</span>
+        </button>
+      } @else {
+        <div class="preview-container" (click)="openRueckseite()">
+          <img [src]="previewRueckseite()" alt="Rückseite" class="preview-img" />
+          <span class="preview-replace-hint">Tippen zum Ändern</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (previewVorderseite()) {
+    <button
+      type="button"
+      class="btn-auslesen"
+      [disabled]="isProcessing()"
+      (click)="auslesen()"
+    >
+      @if (isProcessing()) {
+        <span class="spinner-inline"></span>
+        KI liest aus…
+      } @else {
+        KI auslesen
+        @if (previewRueckseite()) { <span class="badge">2 Seiten</span> }
+      }
+    </button>
   }
 
   @if (errorMsg()) {

@@ -34,7 +34,13 @@
       "Bash(docker run:*)",
       "Bash(powershell -Command \"Get-ChildItem -Path 'W:\\\\Dev\\\\Privat\\\\Pironi' -Force | Select-Object Name\")",
       "Bash(powershell -Command \"Get-ChildItem -Path 'W:\\\\Dev\\\\Privat\\\\Pironi\\\\backend' -Force | Select-Object Name\")",
-      "Bash(docker volume:*)"
+      "Bash(docker volume:*)",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"test\",\"password\":\"test\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"Sascha\",\"password\":\"test\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"Sascha\",\"password\":\"mitra2024\"}')",
+      "Bash(grep -E \"\\\\.\\(py|ts\\)$\")",
+      "Bash(find:*)"
     ]
   }
 }

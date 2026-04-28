@@ -27,6 +27,7 @@ export interface Termin {
   monteure: number[];
   push_gesendet: boolean;
   erinnerung_minuten: number;
+  erinnerung_ton: boolean;
   notiz_id?: string;
   erstellt_am: string;
   geaendert_am: string;
@@ -44,4 +45,5 @@ export interface TerminCreateRequest {
   adresse?: Partial<TerminAdresse>;
   monteure?: number[];
   erinnerung_minuten?: number;
+  erinnerung_ton?: boolean;
 }

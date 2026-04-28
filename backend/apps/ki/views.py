@@ -87,23 +87,35 @@ def transkribiere_view(request):
 @parser_classes([MultiPartParser, FormParser])
 def lese_visitenkarte_view(request):
     """
-    POST /api/ki/lese-visitenkarte/ (multipart/form-data: file=<bilddatei>)
-    Liest Visitenkarte via Claude Vision.
+    POST /api/ki/lese-visitenkarte/
+    multipart/form-data: file=<vorderseite>, file_rueckseite=<rückseite optional>
+    Liest Visitenkarte via Claude Vision. Beide Seiten werden gleichzeitig ausgewertet.
     """
     foto = request.FILES.get('file')
     if not foto:
         return Response({'error': 'Kein Foto'}, status=status.HTTP_400_BAD_REQUEST)
 
-    suffix = os.path.splitext(foto.name)[1] or '.jpg'
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+    suffix_v = os.path.splitext(foto.name)[1] or '.jpg'
+    with tempfile.NamedTemporaryFile(suffix=suffix_v, delete=False) as tmp:
         for chunk in foto.chunks():
             tmp.write(chunk)
-        tmp_path = tmp.name
+        tmp_vorderseite = tmp.name
+
+    foto_rueckseite = request.FILES.get('file_rueckseite')
+    tmp_rueckseite = None
+    if foto_rueckseite:
+        suffix_r = os.path.splitext(foto_rueckseite.name)[1] or '.jpg'
+        with tempfile.NamedTemporaryFile(suffix=suffix_r, delete=False) as tmp:
+            for chunk in foto_rueckseite.chunks():
+                tmp.write(chunk)
+            tmp_rueckseite = tmp.name
 
     try:
-        result = lese_visitenkarte(tmp_path)
+        result = lese_visitenkarte(tmp_vorderseite, tmp_rueckseite)
         return Response(result)
     except Exception as e:
         return Response({'error': str(e), 'konfidenz': 0}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
-        os.unlink(tmp_path)
+        os.unlink(tmp_vorderseite)
+        if tmp_rueckseite:
+            os.unlink(tmp_rueckseite)

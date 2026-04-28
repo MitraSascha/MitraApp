@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TerminStore } from '../stores/termine.store';
+import { TerminStore, WochenTag } from '../stores/termine.store';
 import { TermineService } from '../services/termine.service';
 import { Termin } from '../../../core/models/termin.model';
 
@@ -16,8 +16,35 @@ export class TermineListeComponent implements OnInit {
   readonly store = inject(TerminStore);
   private readonly service = inject(TermineService);
 
+  readonly syncMenuOffen = signal(false);
+  readonly isSyncing = signal(false);
+  readonly syncErgebnis = signal<string | null>(null);
+
+  readonly heutigesDatum = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+
   async ngOnInit(): Promise<void> {
     await this.service.ladeAlle();
+    this.service.checkReminders();
+  }
+
+  toggleSyncMenu(): void {
+    this.syncMenuOffen.update(v => !v);
+  }
+
+  async syncManuell(tage: 7 | 14 | 30): Promise<void> {
+    this.syncMenuOffen.set(false);
+    this.isSyncing.set(true);
+    this.syncErgebnis.set(null);
+    try {
+      const result = await this.service.heroSync(tage);
+      this.syncErgebnis.set(`${result.neu} neu · ${result.aktualisiert} aktualisiert`);
+      setTimeout(() => this.syncErgebnis.set(null), 4000);
+    } finally {
+      this.isSyncing.set(false);
+    }
   }
 
   async loesche(termin: Termin, event: Event): Promise<void> {
@@ -28,11 +55,14 @@ export class TermineListeComponent implements OnInit {
     }
   }
 
-  formatDatum(iso: string): string {
-    return new Date(iso).toLocaleDateString('de-DE', {
-      weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
-    });
+  formatZeit(iso: string): string {
+    return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  istHeute(datum: string): boolean {
+    return datum === this.heutigesDatum;
   }
 
   trackById(_: number, t: Termin): string { return t.id; }
+  trackByDatum(_: number, g: WochenTag): string { return g.datum; }
 }

@@ -30,6 +30,19 @@ export class TerminDetailComponent implements OnInit {
   readonly ende = signal('');
   readonly beschreibung = signal('');
   readonly erinnerungMinuten = signal(30);
+  readonly erinnerungTon = signal(true);
+
+  readonly erinnerungOptionen = [
+    { minuten: 0,    label: 'Keine' },
+    { minuten: 15,   label: '15 Min' },
+    { minuten: 30,   label: '30 Min' },
+    { minuten: 60,   label: '1 Std' },
+    { minuten: 120,  label: '2 Std' },
+    { minuten: 240,  label: '4 Std' },
+    { minuten: 480,  label: '8 Std' },
+    { minuten: 720,  label: '12 Std' },
+    { minuten: 1440, label: '1 Tag' },
+  ];
 
   readonly typOptionen: Array<{ value: TerminTyp; label: string }> = [
     { value: 'aufmass', label: 'Aufmaß' },
@@ -58,6 +71,7 @@ export class TerminDetailComponent implements OnInit {
         this.ende.set(this.toDatetimeLocal(new Date(found.ende)));
         this.beschreibung.set(found.beschreibung ?? '');
         this.erinnerungMinuten.set(found.erinnerung_minuten);
+        this.erinnerungTon.set(found.erinnerung_ton ?? true);
       }
     }
   }
@@ -72,6 +86,7 @@ export class TerminDetailComponent implements OnInit {
         beginn: new Date(this.beginn()).toISOString(),
         ende: new Date(this.ende()).toISOString(),
         erinnerung_minuten: this.erinnerungMinuten(),
+        erinnerung_ton: this.erinnerungTon(),
       };
 
       if (this.isNeu()) {
@@ -83,6 +98,7 @@ export class TerminDetailComponent implements OnInit {
           beginn: request.beginn,
           ende: request.ende,
           erinnerung_minuten: request.erinnerung_minuten,
+          erinnerung_ton: request.erinnerung_ton,
           beschreibung: this.beschreibung(),
         });
       }

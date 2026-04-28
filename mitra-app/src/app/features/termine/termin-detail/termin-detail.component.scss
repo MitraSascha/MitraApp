@@ -96,6 +96,56 @@
   gap: 6px;
 }
 
+.erinnerung-optionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.erinnerung-chip {
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-height: 34px;
+  transition: all 0.15s;
+
+  &.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+  }
+}
+
+.form-group--inline {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  label { margin: 0; }
+}
+
+.toggle-btn {
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  min-height: 34px;
+  transition: all 0.15s;
+
+  &.active {
+    background: rgba(76, 175, 80, 0.15);
+    border-color: #4CAF50;
+    color: #4CAF50;
+  }
+}
+
 .typ-chip {
   padding: 6px 14px;
   background: var(--color-surface);

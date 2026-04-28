@@ -4,8 +4,26 @@ Docs: https://login.hero-software.de/api/external/v7/graphql
 """
 import httpx
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from django.conf import settings
 from django.contrib.auth.models import User
+
+_BERLIN = ZoneInfo('Europe/Berlin')
+
+
+def _fix_hero_datetime(dt_str: str | None) -> str | None:
+    """
+    HERO gibt Berliner Lokalzeit mit +00:00 zurück (fälschlicherweise als UTC markiert).
+    Wir parsen als naive datetime und lokalisieren korrekt als Europe/Berlin.
+    """
+    if not dt_str:
+        return dt_str
+    naive_str = dt_str.replace('+00:00', '').replace('Z', '')
+    try:
+        naive = datetime.fromisoformat(naive_str)
+        return naive.replace(tzinfo=_BERLIN).isoformat()
+    except ValueError:
+        return dt_str
 
 
 HERO_GRAPHQL_URL = "https://login.hero-software.de/api/external/v7/graphql"
@@ -14,27 +32,20 @@ HERO_GRAPHQL_URL = "https://login.hero-software.de/api/external/v7/graphql"
 # Die genaue Feldstruktur wird per Schema-Introspection ermittelt.
 # Fallback: breite Query die alle wichtigen Felder abdeckt.
 CALENDAR_EVENTS_QUERY = """
-query CalendarEvents($partnerId: ID, $from: String, $to: String) {
-  calendar_events(partner_id: $partnerId, date_from: $from, date_to: $to) {
+query CalendarEvents($partnerIds: [Int], $start: DateTime, $end: DateTime) {
+  calendar_events(partner_ids: $partnerIds, start: $start, end: $end) {
     id
     title
     description
-    start_at
-    end_at
+    start
+    end
     all_day
-    status
-    type
-    address {
-      street
-      zip
-      city
-    }
-    customer {
+    is_done
+    deleted
+    category {
       name
-      phone
-      email
     }
-    partner {
+    partners {
       id
       name
     }
@@ -45,12 +56,12 @@ query CalendarEvents($partnerId: ID, $from: String, $to: String) {
 
 def _hero_headers() -> dict:
     return {
-        "Authorization": f"Bearer {settings.HERO_API_TOKEN}",
+        "Authorization": settings.HERO_API_TOKEN,  # Enthält bereits "Bearer ..."
         "Content-Type": "application/json",
     }
 
 
-def fetch_hero_termine(hero_partner_id: str, tage_voraus: int = 30) -> list[dict]:
+def fetch_hero_termine(hero_partner_id: str, tage_voraus: int = 7) -> list[dict]:
     """
     Ruft Termine für einen Monteur aus HERO CRM ab.
     Gibt eine Liste von rohen HERO-Objekten zurück.
@@ -59,16 +70,20 @@ def fetch_hero_termine(hero_partner_id: str, tage_voraus: int = 30) -> list[dict
     if not settings.HERO_API_TOKEN:
         raise ValueError("HERO_API_TOKEN nicht konfiguriert")
 
-    now = datetime.now()
-    von = (now - timedelta(days=7)).strftime("%Y-%m-%d")
-    bis = (now + timedelta(days=tage_voraus)).strftime("%Y-%m-%d")
+    tz = ZoneInfo(settings.TIME_ZONE)
+    now = datetime.now(tz=tz)
+    von = (now - timedelta(days=7)).strftime("%Y-%m-%dT00:00:00%z")
+    bis = (now + timedelta(days=tage_voraus)).strftime("%Y-%m-%dT23:59:59%z")
+    # HERO erwartet +02:00 statt +0200 — Doppelpunkt einfügen
+    von = von[:-2] + ":" + von[-2:]
+    bis = bis[:-2] + ":" + bis[-2:]
 
     payload = {
         "query": CALENDAR_EVENTS_QUERY,
         "variables": {
-            "partnerId": hero_partner_id,
-            "from": von,
-            "to": bis,
+            "partnerIds": [int(hero_partner_id)],
+            "start": von,
+            "end": bis,
         },
     }
 
@@ -87,31 +102,28 @@ def fetch_hero_termine(hero_partner_id: str, tage_voraus: int = 30) -> list[dict
     return data.get("data", {}).get("calendar_events") or []
 
 
-def _map_hero_status(hero_status: str) -> str:
-    """Mappt HERO-Status auf interne Termin-Status."""
-    mapping = {
-        "planned":    "geplant",
-        "confirmed":  "bestaetigt",
-        "cancelled":  "abgesagt",
-        "done":       "erledigt",
-        "completed":  "erledigt",
-    }
-    return mapping.get((hero_status or "").lower(), "geplant")
+def _map_hero_status(is_done: bool) -> str:
+    """Mappt HERO is_done auf interne Termin-Status."""
+    return "erledigt" if is_done else "geplant"
 
 
-def _map_hero_type(hero_type: str) -> str:
-    """Mappt HERO-Auftragstyp auf interne Termin-Typen."""
-    mapping = {
-        "measurement": "aufmass",
-        "maintenance": "wartung",
-        "emergency":   "notdienst",
-        "meeting":     "besprechung",
-        "delivery":    "lieferung",
-    }
-    return mapping.get((hero_type or "").lower(), "sonstiges")
+def _map_hero_type(category_name: str) -> str:
+    """Mappt HERO-Kategoriename auf interne Termin-Typen."""
+    name = (category_name or "").lower()
+    if any(w in name for w in ("aufmaß", "aufmass", "measure", "messung")):
+        return "aufmass"
+    if any(w in name for w in ("wartung", "service", "maintenance")):
+        return "wartung"
+    if any(w in name for w in ("notdienst", "emergency", "notruf")):
+        return "notdienst"
+    if any(w in name for w in ("besprechung", "meeting", "termin")):
+        return "besprechung"
+    if any(w in name for w in ("lieferung", "delivery")):
+        return "lieferung"
+    return "sonstiges"
 
 
-def sync_hero_termine_fuer_user(user: User) -> tuple[int, int]:
+def sync_hero_termine_fuer_user(user: User, tage_voraus: int = 7) -> tuple[int, int]:
     """
     Synchronisiert HERO-Termine für einen User.
     Erstellt neue Termine, aktualisiert geänderte.
@@ -123,7 +135,7 @@ def sync_hero_termine_fuer_user(user: User) -> tuple[int, int]:
     if not profile or not profile.hero_partner_id:
         return 0, 0
 
-    hero_termine = fetch_hero_termine(profile.hero_partner_id)
+    hero_termine = fetch_hero_termine(profile.hero_partner_id, tage_voraus=tage_voraus)
 
     neu = 0
     aktualisiert = 0
@@ -133,23 +145,17 @@ def sync_hero_termine_fuer_user(user: User) -> tuple[int, int]:
         if not hero_id:
             continue
 
-        adresse = {}
-        if addr := ht.get("address"):
-            adresse = {
-                "strasse": addr.get("street", ""),
-                "plz":     addr.get("zip", ""),
-                "ort":     addr.get("city", ""),
-            }
+        category_name = (ht.get("category") or {}).get("name", "")
 
         defaults = {
             "titel":        ht.get("title") or "HERO Termin",
             "beschreibung": ht.get("description") or "",
-            "typ":          _map_hero_type(ht.get("type", "")),
-            "status":       _map_hero_status(ht.get("status", "")),
-            "beginn":       ht.get("start_at"),
-            "ende":         ht.get("end_at") or ht.get("start_at"),
+            "typ":          _map_hero_type(category_name),
+            "status":       _map_hero_status(bool(ht.get("is_done", False))),
+            "beginn":       _fix_hero_datetime(ht.get("start")),
+            "ende":         _fix_hero_datetime(ht.get("end") or ht.get("start")),
             "ganztaegig":   bool(ht.get("all_day", False)),
-            "adresse":      adresse,
+            "adresse":      {},
             "monteure":     [user.id],
             "erstellt_von": user,
         }

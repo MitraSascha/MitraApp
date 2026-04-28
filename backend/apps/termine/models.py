@@ -33,6 +33,7 @@ class Termin(models.Model):
     monteure = models.JSONField(default=list)  # Liste von User-IDs
     push_gesendet = models.BooleanField(default=False)
     erinnerung_minuten = models.IntegerField(default=30)
+    erinnerung_ton = models.BooleanField(default=True)
     notiz_id = models.UUIDField(null=True, blank=True)
     erstellt_am = models.DateTimeField(auto_now_add=True)
     geaendert_am = models.DateTimeField(auto_now=True)

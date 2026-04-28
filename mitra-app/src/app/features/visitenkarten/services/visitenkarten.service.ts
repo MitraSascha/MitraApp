@@ -24,8 +24,17 @@ export class VisitenkartenService {
 
       const server = await firstValueFrom(this.api.get<Kontakt[]>('/kontakte/'));
       if (server) {
-        await this.db.kontakte.bulkPut(server);
-        this.store.setKontakte(server);
+        // foto_url wird nicht ans Backend gesynct (base64 zu groß).
+        // Beim Überschreiben des lokalen Eintrags das lokale Foto erhalten.
+        const merged = await Promise.all(
+          server.map(async (k) => {
+            if (k.foto_url) return k;
+            const lokal = await this.db.kontakte.get(k.id);
+            return lokal?.foto_url ? { ...k, foto_url: lokal.foto_url } : k;
+          }),
+        );
+        await this.db.kontakte.bulkPut(merged);
+        this.store.setKontakte(merged);
       }
     } catch {
       // Offline: lokale Daten bleiben
@@ -68,7 +77,7 @@ export class VisitenkartenService {
       entity_type: 'kontakt',
       entity_id: kontakt.id,
       operation: 'create',
-      payload: kontakt as unknown as Record<string, unknown>,
+      payload: this.syncPayload(kontakt),
       priority: 4,
     });
 
@@ -94,7 +103,7 @@ export class VisitenkartenService {
       entity_type: 'kontakt',
       entity_id: id,
       operation: 'update',
-      payload: updated as unknown as Record<string, unknown>,
+      payload: this.syncPayload(updated),
       priority: 4,
     });
 
@@ -116,9 +125,21 @@ export class VisitenkartenService {
     if (navigator.onLine) await this.sync.processQueue();
   }
 
-  async leseVisitenkartePerKI(foto: File): Promise<KiVisitenkarteResponse> {
+  /** Entfernt Felder aus dem Payload, die der Server nicht akzeptiert. */
+  private syncPayload(kontakt: Kontakt): Record<string, unknown> {
+    const { local_id, ...rest } = kontakt as Kontakt & { local_id?: string };
+    // base64-DataURLs bleiben lokal — Backend erwartet max. 500-Zeichen-URL
+    if (rest.foto_url?.startsWith('data:')) {
+      rest.foto_url = undefined;
+    }
+    return rest as unknown as Record<string, unknown>;
+  }
+
+  async leseVisitenkartePerKI(vorderseite: File, rueckseite?: File): Promise<KiVisitenkarteResponse> {
+    const files: Record<string, File> = { file: vorderseite };
+    if (rueckseite) files['file_rueckseite'] = rueckseite;
     return firstValueFrom(
-      this.api.uploadFile<KiVisitenkarteResponse>('/ki/lese-visitenkarte/', foto)
+      this.api.uploadFiles<KiVisitenkarteResponse>('/ki/lese-visitenkarte/', files)
     );
   }
 }

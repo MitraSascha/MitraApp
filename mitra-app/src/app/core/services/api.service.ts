@@ -38,6 +38,12 @@ export class ApiService {
     return this.http.post<T>(`${this.baseUrl}${path}`, formData);
   }
 
+  uploadFiles<T>(path: string, files: Record<string, File>): Observable<T> {
+    const formData = new FormData();
+    Object.entries(files).forEach(([key, file]) => formData.append(key, file));
+    return this.http.post<T>(`${this.baseUrl}${path}`, formData);
+  }
+
   streamSSE(path: string, body: unknown): Observable<string> {
     return new Observable<string>(observer => {
       fetch(`${this.baseUrl}${path}`, {

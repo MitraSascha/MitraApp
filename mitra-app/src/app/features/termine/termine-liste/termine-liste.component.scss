@@ -1,111 +1,263 @@
 .termine-liste {
-  padding: var(--spacing-md);
   max-width: 800px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .liste-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--color-primary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
   h1 {
     font-family: var(--font-headline);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--color-text-primary);
     margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+}
+
+.sync-ergebnis {
+  font-size: 0.75rem;
+  color: #4CAF50;
+  white-space: nowrap;
+}
+
+.sync-wrapper {
+  position: relative;
+}
+
+.btn-sync {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  &.loading {
+    color: var(--color-accent);
+  }
+}
+
+.sync-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 20;
+  min-width: 120px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  button {
+    display: block;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    & + button {
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
   }
 }
 
 .btn-fab {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   background: var(--color-accent);
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   text-decoration: none;
+  line-height: 1;
+  flex-shrink: 0;
 
-  &:hover { opacity: 0.85; }
+  &:hover {
+    opacity: 0.85;
+  }
 }
 
-.loading {
-  text-align: center;
-  color: var(--color-text-secondary);
-  padding: var(--spacing-xl);
+.loading-bar {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  background-size: 200% 100%;
+  animation: loading-slide 1.5s infinite;
 }
 
-.termin-gruppe { margin-bottom: var(--spacing-lg); }
+@keyframes loading-slide {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
 
-.gruppe-label {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary);
+.woche-container {
+  padding: var(--spacing-sm);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tag-gruppe {
   margin-bottom: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--color-surface);
+
+  &.heute {
+    border: 1px solid rgba(232, 112, 10, 0.3);
+  }
+}
+
+.tag-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 0.4rem 0.75rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.03);
+  text-transform: capitalize;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  span:first-child {
+    flex: 1;
+  }
+}
+
+.heute-badge {
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.keine-termine {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.2);
+  font-style: italic;
 }
 
 .termin-items {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
 }
 
 .termin-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  background: var(--color-surface);
-  border-radius: var(--border-radius);
-  border-left: 3px solid transparent;
-  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+  padding: 0.625rem 0.75rem;
   text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s;
+  color: var(--color-text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+  border-left: 3px solid transparent;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
 
   &.typ-notdienst { border-left-color: var(--color-danger); }
   &.typ-aufmass { border-left-color: var(--color-accent); }
-  &.typ-wartung { border-left-color: var(--color-warning); }
-  &.typ-besprechung { border-left-color: #6e7681; }
-
-  &:hover { border-left-color: var(--color-accent); }
+  &.typ-wartung { border-left-color: var(--color-warning, #FF9800); }
+  &.typ-besprechung { border-left-color: #9C27B0; }
+  &.typ-lieferung { border-left-color: #4CAF50; }
+  &.typ-sonstiges { border-left-color: #607D8B; }
 }
 
 .termin-zeit {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--color-text-secondary);
-  min-width: 100px;
+  min-width: 38px;
 }
 
 .termin-info {
   flex: 1;
+  overflow: hidden;
+
+  .termin-titel {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .termin-adresse {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.termin-meta {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 2px;
-}
-
-.termin-titel {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-
-.termin-adresse {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  flex-shrink: 0;
 }
 
 .termin-typ-badge {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   color: var(--color-text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.erinnerung-icon {
+  font-size: 0.7rem;
 }
 
 .btn-del {
@@ -114,14 +266,30 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 4px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.15s, color 0.15s;
 
-  &:hover { color: var(--color-danger); }
+  &:hover {
+    opacity: 1;
+    color: var(--color-danger);
+  }
 }
 
 .empty-state {
   text-align: center;
   padding: var(--spacing-xl);
   color: var(--color-text-secondary);
+
+  p {
+    margin: 0.25rem 0;
+  }
+
+  .empty-hint {
+    font-size: 0.85rem;
+  }
 
   .btn-primary {
     display: inline-block;

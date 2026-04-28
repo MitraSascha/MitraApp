@@ -16,6 +16,21 @@ export class TermineService {
   private readonly store = inject(TerminStore);
   private readonly auth = inject(AuthService);
 
+  private getWocheVonBis(): { von: string; bis: string } {
+    const heute = new Date();
+    const wochentag = heute.getDay();
+    const diffZuMontag = wochentag === 0 ? -6 : 1 - wochentag;
+    const montag = new Date(heute);
+    montag.setDate(heute.getDate() + diffZuMontag);
+    montag.setHours(0, 0, 0, 0);
+    const sonntag = new Date(montag);
+    sonntag.setDate(montag.getDate() + 6);
+    return {
+      von: montag.toISOString().slice(0, 10),
+      bis: sonntag.toISOString().slice(0, 10),
+    };
+  }
+
   async ladeAlle(): Promise<void> {
     this.store.setLoading(true);
     try {
@@ -25,10 +40,13 @@ export class TermineService {
       if (!navigator.onLine) return;
 
       if (this.auth.currentUser()?.hero_partner_id) {
-        await this.heroSync();
+        await this.heroSync(7);
       }
 
-      const server = await firstValueFrom(this.api.get<Termin[]>('/termine/'));
+      const { von, bis } = this.getWocheVonBis();
+      const server = await firstValueFrom(
+        this.api.get<Termin[]>(`/termine/?von=${von}&bis=${bis}`)
+      );
       if (server) {
         await this.db.termine.bulkPut(server);
         this.store.setTermine(server);
@@ -40,18 +58,30 @@ export class TermineService {
     }
   }
 
-  async heroSync(): Promise<void> {
+  async heroSync(tage: 7 | 14 | 30 = 7): Promise<{ neu: number; aktualisiert: number }> {
     try {
-      await firstValueFrom(this.api.post<void>('/termine/hero-sync/', {}));
-      // Nach Sync: Server-Daten neu laden
-      const serverDaten = await firstValueFrom(this.api.get<Termin[]>('/termine/'));
+      const result = await firstValueFrom(
+        this.api.post<{ neu: number; aktualisiert: number }>('/termine/hero-sync/', { tage })
+      );
+      const { von, bis } = this.getWocheVonBis();
+      const serverDaten = await firstValueFrom(
+        this.api.get<Termin[]>(`/termine/?von=${von}&bis=${bis}`)
+      );
       if (serverDaten) {
         await this.db.termine.bulkPut(serverDaten);
         this.store.setTermine(serverDaten);
       }
+      return result ?? { neu: 0, aktualisiert: 0 };
     } catch {
-      // HERO Sync optional — kein crash bei Fehler
+      return { neu: 0, aktualisiert: 0 };
     }
+  }
+
+  async checkReminders(): Promise<void> {
+    if (!navigator.onLine) return;
+    try {
+      await firstValueFrom(this.api.post<void>('/termine/check-reminders/', {}));
+    } catch { /* ignorieren */ }
   }
 
   async erstelle(request: TerminCreateRequest): Promise<Termin> {
@@ -70,6 +100,7 @@ export class TermineService {
       monteure: request.monteure ?? (user ? [user.id] : []),
       push_gesendet: false,
       erinnerung_minuten: request.erinnerung_minuten ?? 30,
+      erinnerung_ton: request.erinnerung_ton ?? true,
       erstellt_am: now,
       geaendert_am: now,
       sync_status: 'pending',

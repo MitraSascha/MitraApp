@@ -9,9 +9,9 @@ Alle Memory-Dateien sind unter `memory/` abgelegt.
 
 | Datei | Inhalt | Zuletzt aktualisiert |
 |---|---|---|
-| [project_status.md](project/project_status.md) | Aktueller Projektstatus, offene Aufgaben | 2026-04-27 |
-| [project_decisions.md](project/project_decisions.md) | Architektur- & Technologieentscheidungen | 2026-04-26 |
-| [project_dependencies.md](project/project_dependencies.md) | Abhängigkeiten & Zugangsdaten-Status | 2026-04-26 |
+| [project_status.md](project/project_status.md) | Aktueller Projektstatus, offene Aufgaben | 2026-04-28 |
+| [project_decisions.md](project/project_decisions.md) | Architektur- & Technologieentscheidungen + HERO API Erkenntnisse | 2026-04-28 |
+| [project_dependencies.md](project/project_dependencies.md) | Abhängigkeiten, Zugangsdaten, manuell installierte Packages | 2026-04-28 |
 
 ---
 
@@ -23,6 +23,8 @@ Alle Memory-Dateien sind unter `memory/` abgelegt.
 | [architect_gesamtarchitektur.md](subagents/architect_gesamtarchitektur.md) | architect | Gesamtarchitektur | ✅ completed |
 | [state_phase1.md](subagents/state_phase1.md) | state/manager | Phase 1 komplett | ✅ completed |
 | [state_phase2_3.md](subagents/state_phase2_3.md) | state/manager | Phase 2+3 komplett | ✅ completed |
+| [code_hero_sync_backend.md](subagents/code_hero_sync_backend.md) | code | HERO CRM Sync (inkl. Bugfixes) | ✅ completed |
+| [debug_2026-04-28.md](subagents/debug_2026-04-28.md) | debug | Bugfixes vom 2026-04-28 | ✅ completed |
 
 ---
 

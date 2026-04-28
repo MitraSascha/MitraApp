@@ -16,32 +16,59 @@ export class FotoUploadComponent {
   private readonly service = inject(VisitenkartenService);
 
   readonly isProcessing = signal(false);
-  readonly previewUrl = signal<string | null>(null);
+  readonly previewVorderseite = signal<string | null>(null);
+  readonly previewRueckseite = signal<string | null>(null);
   readonly errorMsg = signal<string | null>(null);
 
-  async onFileSelected(event: Event): Promise<void> {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+  private fileVorderseite: File | null = null;
+  private fileRueckseite: File | null = null;
+
+  openVorderseite(): void {
+    document.getElementById('foto-input-vorderseite')?.click();
+  }
+
+  openRueckseite(): void {
+    document.getElementById('foto-input-rueckseite')?.click();
+  }
+
+  onVorderseitSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+    this.fileVorderseite = file;
+    this.errorMsg.set(null);
+    const reader = new FileReader();
+    reader.onload = e => this.previewVorderseite.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  onRueckseitSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.fileRueckseite = file;
+    this.errorMsg.set(null);
+    const reader = new FileReader();
+    reader.onload = e => this.previewRueckseite.set(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async auslesen(): Promise<void> {
+    if (!this.fileVorderseite) return;
 
     this.errorMsg.set(null);
-
-    // Lokale Vorschau
-    const reader = new FileReader();
-    reader.onload = e => this.previewUrl.set(e.target?.result as string);
-    reader.readAsDataURL(file);
-
     this.isProcessing.set(true);
     try {
-      const kiDaten = await this.service.leseVisitenkartePerKI(file);
+      const kiDaten = await this.service.leseVisitenkartePerKI(
+        this.fileVorderseite,
+        this.fileRueckseite ?? undefined,
+      );
       this.fotoAusgelesen.emit({
-        fotoUrl: this.previewUrl() ?? '',
+        fotoUrl: this.previewVorderseite() ?? '',
         kiDaten,
       });
     } catch {
       this.errorMsg.set('KI-Auslese fehlgeschlagen. Felder bitte manuell ausfüllen.');
       this.fotoAusgelesen.emit({
-        fotoUrl: this.previewUrl() ?? '',
+        fotoUrl: this.previewVorderseite() ?? '',
         kiDaten: { konfidenz: 0 },
       });
     } finally {
@@ -49,7 +76,11 @@ export class FotoUploadComponent {
     }
   }
 
-  openCamera(): void {
-    document.getElementById('foto-input')?.click();
+  reset(): void {
+    this.fileVorderseite = null;
+    this.fileRueckseite = null;
+    this.previewVorderseite.set(null);
+    this.previewRueckseite.set(null);
+    this.errorMsg.set(null);
   }
 }

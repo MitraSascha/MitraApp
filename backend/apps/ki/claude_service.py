@@ -1,11 +1,7 @@
 """
 Claude KI-Service für MitraApp.
 Alle Aufrufe laufen durch den PII-Filter.
-
-Auth-Reihenfolge für Claude CLI:
-1. ~/.claude/credentials (via Volume-Mount vom Host: ~/.claude:/root/.claude:ro)
-   → Eingeloggt mit `claude login` auf dem Host — kein API-Key nötig
-2. ANTHROPIC_API_KEY in .env (als Fallback für Server-Deploy)
+Auth via ~/.claude (Volume-Mount vom Host: C:/Users/sasch/.claude:/root/.claude:ro)
 """
 import json
 import os
@@ -14,18 +10,33 @@ from django.conf import settings
 from .pii_filter import zensiere_pii
 
 
+_CLAUDE_HOME = '/tmp/claude_home'
+
+
+def _ensure_claude_home() -> None:
+    """
+    ~/.claude ist read-only gemountet. Wir kopieren die Credentials einmalig
+    in ein beschreibbares Verzeichnis, damit Claude CLI Session-Dateien ablegen kann.
+    """
+    import shutil
+    target = os.path.join(_CLAUDE_HOME, '.claude')
+    if not os.path.exists(target):
+        os.makedirs(_CLAUDE_HOME, exist_ok=True)
+        src = '/root/.claude'
+        if os.path.exists(src):
+            shutil.copytree(src, target)
+        else:
+            os.makedirs(target, exist_ok=True)
+
+
 def claude_cli(prompt: str) -> str:
     """
     Ruft Claude CLI auf. PII MUSS vor Aufruf zensiert sein.
-    Auth via ~/.claude (Volume-Mount) oder ANTHROPIC_API_KEY.
+    Auth via ~/.claude Volume-Mount (wird in beschreibbares /tmp kopiert).
     """
-    # Vollständiges Prozess-Environment übernehmen (damit ~/.claude Auth funktioniert)
+    _ensure_claude_home()
     env = os.environ.copy()
-
-    # ANTHROPIC_API_KEY nur setzen wenn vorhanden (überschreibt ~/.claude nicht)
-    api_key = getattr(settings, 'ANTHROPIC_API_KEY', '')
-    if api_key:
-        env['ANTHROPIC_API_KEY'] = api_key
+    env['HOME'] = _CLAUDE_HOME
 
     result = subprocess.run(
         ['claude', '-p', prompt, '--output-format', 'text'],
@@ -79,41 +90,43 @@ Antworte NUR mit dem JSON-Objekt, kein anderer Text."""
         }
 
 
-def lese_visitenkarte(foto_path: str) -> dict:
+def lese_visitenkarte(foto_vorderseite: str, foto_rueckseite: str | None = None) -> dict:
     """
-    Liest eine Visitenkarte via Claude Vision API.
-    PII bleibt lokal — Foto wird als Base64 an Claude gesendet.
+    Liest eine Visitenkarte via Claude Vision (Claude CLI mit @-Dateireferenz).
+    Unterstützt Vorder- und Rückseite. PII bleibt lokal.
     """
-    import base64
+    if foto_rueckseite:
+        bilder_hinweis = (
+            f'Vorderseite: @{foto_vorderseite}\n'
+            f'Rückseite: @{foto_rueckseite}\n\n'
+            f'Kombiniere die Informationen aus beiden Seiten.'
+        )
+    else:
+        bilder_hinweis = f'Bild: @{foto_vorderseite}'
 
-    with open(foto_path, 'rb') as f:
-        foto_b64 = base64.b64encode(f.read()).decode()
-
-    prompt = f"""Du bist ein Assistent, der Visitenkarten ausliest.
-Extrahiere alle Informationen aus dieser Visitenkarte als JSON.
-
-Format:
-{{
-  "firma": "Firmenname oder null",
-  "ansprechpartner": "Vor- und Nachname oder null",
-  "position": "Jobtitel oder null",
-  "mobil": "Mobilnummer oder null",
-  "telefon": "Telefonnummer oder null",
-  "email": "E-Mail-Adresse oder null",
-  "website": "Website-URL oder null",
-  "adresse": {{
-    "strasse": "Straße und Hausnummer oder null",
-    "plz": "PLZ oder null",
-    "ort": "Ort oder null",
-    "land": "Land oder null"
-  }},
-  "konfidenz": 0.0 bis 1.0 (wie sicher bist du bei der Extraktion)
-}}
-
-Visitenkarte (Base64-Bild):
-data:image/jpeg;base64,{foto_b64}
-
-Antworte NUR mit dem JSON-Objekt."""
+    prompt = (
+        f'Du bist ein Assistent, der Visitenkarten ausliest. '
+        f'Extrahiere alle Informationen aus {"diesen Bildern" if foto_rueckseite else "diesem Bild"} als JSON.\n\n'
+        f'Format:\n'
+        f'{{\n'
+        f'  "firma": "Firmenname oder null",\n'
+        f'  "ansprechpartner": "Vor- und Nachname oder null",\n'
+        f'  "position": "Jobtitel oder null",\n'
+        f'  "mobil": "Mobilnummer oder null",\n'
+        f'  "telefon": "Telefonnummer oder null",\n'
+        f'  "email": "E-Mail-Adresse oder null",\n'
+        f'  "website": "Website-URL oder null",\n'
+        f'  "adresse": {{\n'
+        f'    "strasse": "Straße und Hausnummer oder null",\n'
+        f'    "plz": "PLZ oder null",\n'
+        f'    "ort": "Ort oder null",\n'
+        f'    "land": "Land oder null"\n'
+        f'  }},\n'
+        f'  "konfidenz": 0.0 bis 1.0\n'
+        f'}}\n\n'
+        f'{bilder_hinweis}\n\n'
+        f'Antworte NUR mit dem JSON-Objekt.'
+    )
 
     antwort = claude_cli(prompt)
 
@@ -123,7 +136,6 @@ Antworte NUR mit dem JSON-Objekt."""
             end = antwort.rindex('}') + 1
             antwort = antwort[start:end]
         data = json.loads(antwort)
-        # Null-Werte entfernen
         return {k: v for k, v in data.items() if v is not None}
     except (json.JSONDecodeError, ValueError):
         return {'konfidenz': 0}
