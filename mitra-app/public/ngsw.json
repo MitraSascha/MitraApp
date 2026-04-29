@@ -1,0 +1,15 @@
+{
+  "configVersion": 1,
+  "timestamp": 1000000000000,
+  "index": "/index.html",
+  "assetGroups": [],
+  "dataGroups": [],
+  "navigationUrls": [
+    {"positive": true,  "regex": "^\\/.*$"},
+    {"positive": false, "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"},
+    {"positive": false, "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"},
+    {"positive": false, "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"}
+  ],
+  "navigationRequestStrategy": "freshness",
+  "hashTable": {}
+}

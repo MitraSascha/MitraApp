@@ -1,0 +1,7 @@
+@if (!dismissed() && !notificationService.isSubscribed()) {
+  <div class="push-banner">
+    <span class="push-banner__text">🔔 Termin-Erinnerungen aktivieren</span>
+    <button class="push-banner__btn" (click)="activate()">Aktivieren</button>
+    <button class="push-banner__close" (click)="dismissed.set(true)">×</button>
+  </div>
+}

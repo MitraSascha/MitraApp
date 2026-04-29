@@ -18,34 +18,29 @@ export class NotificationService {
 
   async init(): Promise<void> {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
+    this._permission.set(Notification.permission);
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
     this._isSubscribed.set(sub !== null);
-    this._permission.set(Notification.permission);
   }
 
-  async requestPermission(): Promise<boolean> {
+  async subscribe(): Promise<void> {
     const result = await Notification.requestPermission();
     this._permission.set(result);
-    return result === 'granted';
-  }
+    if (result !== 'granted') return;
 
-  async subscribe(): Promise<PushSubscription | null> {
-    const granted = await this.requestPermission();
-    if (!granted) return null;
-
-    const reg = await navigator.serviceWorker.ready;
-    const applicationServerKey = environment.vapidPublicKey
-      ? this.urlBase64ToUint8Array(environment.vapidPublicKey).buffer as ArrayBuffer
-      : undefined;
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey,
-    });
-    this._isSubscribed.set(true);
-    await this.sendSubscriptionToServer(sub);
-    return sub;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(environment.vapidPublicKey).buffer as ArrayBuffer,
+      });
+      await firstValueFrom(this.api.post('/push/subscribe/', sub.toJSON()));
+      this._isSubscribed.set(true);
+    } catch (err) {
+      console.error('[Push] Subscription fehlgeschlagen:', err);
+      alert('Push-Fehler: ' + (err as Error).message);
+    }
   }
 
   async unsubscribe(): Promise<void> {
@@ -58,10 +53,6 @@ export class NotificationService {
     this._isSubscribed.set(false);
   }
 
-  async sendSubscriptionToServer(sub: PushSubscription): Promise<void> {
-    await firstValueFrom(this.api.post('/push/subscribe/', sub.toJSON()));
-  }
-
   checkIosInstallStatus(): boolean {
     return (navigator as Navigator & { standalone?: boolean }).standalone === true;
   }
@@ -70,6 +61,6 @@ export class NotificationService {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = atob(base64);
-    return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
   }
 }

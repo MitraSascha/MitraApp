@@ -8,7 +8,9 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.production
     ? environment.apiUrl
-    : `http://${window.location.hostname}:8000/api`;
+    : window.location.protocol === 'https:'
+      ? '/api'                                          // HTTPS-Proxy (port 4443)
+      : `http://${window.location.hostname}:8000/api`; // direkter Dev-Server (port 4200)
 
   get<T>(path: string, params?: Record<string, string>): Observable<T> {
     const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;

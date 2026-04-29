@@ -26,7 +26,8 @@
     <div class="input-row">
       <textarea
         class="frage-input"
-        [(ngModel)]="frageText"
+        [ngModel]="frageText()"
+        (ngModelChange)="frageText.set($event)"
         (keydown)="onKeydown($event)"
         placeholder="Frage eingeben… (Enter zum Senden)"
         rows="1"

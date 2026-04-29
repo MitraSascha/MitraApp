@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8000/api',
+  apiUrl: '/api',
   ragflowUrl: 'https://ragflow.eigene-tools.pro',
   ragflowApiKey: '',          // in .env — nicht im Code
   heroApiToken: '',           // in .env — nicht im Code

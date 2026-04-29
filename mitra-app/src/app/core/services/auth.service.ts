@@ -8,9 +8,10 @@ const ACCESS_TOKEN_KEY = 'mitra_access';
 const REFRESH_TOKEN_KEY = 'mitra_refresh';
 
 function resolveApiUrl(): string {
-  return environment.production
-    ? environment.apiUrl
-    : `http://${window.location.hostname}:8000/api`;
+  if (environment.production) return environment.apiUrl;
+  return window.location.protocol === 'https:'
+    ? '/api'                                          // HTTPS-Proxy (port 4443)
+    : `http://${window.location.hostname}:8000/api`; // direkter Dev-Server (port 4200)
 }
 
 @Injectable({ providedIn: 'root' })

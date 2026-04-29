@@ -14,10 +14,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([offlineInterceptor, jwtInterceptor, refreshInterceptor])
     ),
-    // ngsw temporär für Phase 1 (Asset-Caching) — Migration zu Workbox in Phase 2
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
+    provideServiceWorker(isDevMode() ? 'push-sw.js' : 'ngsw-worker.js', {
+      enabled: true,
+      registrationStrategy: 'registerWhenStable:3000',
     }),
   ],
 };

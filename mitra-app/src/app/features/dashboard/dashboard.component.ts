@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { DashboardStore } from './stores/dashboard.store';
 import { NotizenService } from '../notizen/services/notizen.service';
 import { TermineService } from '../termine/services/termine.service';
+import { PushBannerComponent } from '../../shared/components/push-banner/push-banner.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PushBannerComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })

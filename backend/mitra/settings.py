@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'apps.notizen',
-    'apps.termine',
+    'apps.termine.apps.TermineConfig',
     'apps.kontakte',
     'apps.angebote',
     'apps.ki',

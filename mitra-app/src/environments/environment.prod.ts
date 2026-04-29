@@ -4,5 +4,5 @@ export const environment = {
   ragflowUrl: 'https://ragflow.eigene-tools.pro',
   ragflowApiKey: '',          // via Docker ENV injiziert
   heroApiToken: '',           // via Docker ENV injiziert
-  vapidPublicKey: '',         // via Docker ENV injiziert
+  vapidPublicKey: 'BIYg7yieiGd0c5s_QXZodyJYTkF_E6EE0BBtuUvD1i1E6e2iX3vfdty5fdeK05dOKK1k5sIgzGr72oum9R7D3zM',
 };

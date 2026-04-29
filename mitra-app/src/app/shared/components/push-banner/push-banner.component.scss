@@ -1,0 +1,29 @@
+.push-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #2D333B;
+  border-bottom: 1px solid #E8700A;
+
+  &__text { flex: 1; color: #CDD9E5; font-size: 14px; }
+
+  &__btn {
+    background: #E8700A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    color: #768390;
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+  }
+}
