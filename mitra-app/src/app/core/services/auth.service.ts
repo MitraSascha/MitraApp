@@ -7,6 +7,12 @@ import { environment } from '../../../environments/environment';
 const ACCESS_TOKEN_KEY = 'mitra_access';
 const REFRESH_TOKEN_KEY = 'mitra_refresh';
 
+function resolveApiUrl(): string {
+  return environment.production
+    ? environment.apiUrl
+    : `http://${window.location.hostname}:8000/api`;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -22,7 +28,7 @@ export class AuthService {
     this._isLoading.set(true);
     try {
       const tokens = await firstValueFrom(
-        this.http.post<AuthTokens>(`${environment.apiUrl}/auth/login/`, credentials)
+        this.http.post<AuthTokens>(`${resolveApiUrl()}/auth/login/`, credentials)
       );
       localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
       localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh);
@@ -42,7 +48,7 @@ export class AuthService {
     if (!refresh) throw new Error('Kein Refresh-Token vorhanden');
 
     const tokens = await firstValueFrom(
-      this.http.post<AuthTokens>(`${environment.apiUrl}/auth/refresh/`, { refresh })
+      this.http.post<AuthTokens>(`${resolveApiUrl()}/auth/refresh/`, { refresh })
     );
     localStorage.setItem(ACCESS_TOKEN_KEY, tokens.access);
     return tokens.access;
@@ -53,7 +59,7 @@ export class AuthService {
     if (!token) return;
 
     const user = await firstValueFrom(
-      this.http.get<AppUser>(`${environment.apiUrl}/auth/me/`)
+      this.http.get<AppUser>(`${resolveApiUrl()}/auth/me/`)
     );
     this._currentUser.set(user);
   }

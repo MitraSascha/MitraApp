@@ -40,7 +40,13 @@
       "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"admin\",\"password\":\"admin\"}')",
       "Bash(curl -s -X POST http://localhost:8000/api/auth/login/ -H \"Content-Type: application/json\" -d '{\"username\":\"Sascha\",\"password\":\"mitra2024\"}')",
       "Bash(grep -E \"\\\\.\\(py|ts\\)$\")",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep -E \"^\\\\./[^/]+/[^/]*$|^\\\\./[^/]+$\")",
+      "PowerShell(Set-Content *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git pull *)",
+      "Bash(git add *)"
     ]
   }
 }

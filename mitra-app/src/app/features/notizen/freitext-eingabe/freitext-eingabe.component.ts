@@ -36,7 +36,7 @@ export class FreitextEingabeComponent {
   }
 
   onTranskript(text: string): void {
-    this.text.set(text);
+    this.text.update(current => current ? `${current} ${text}` : text);
   }
 
   async analysieren(): Promise<void> {

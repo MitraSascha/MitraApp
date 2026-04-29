@@ -158,11 +158,26 @@
 
 // ── Positionen ──────────────────────────────────────────
 
+.pos-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .btn-add-pos {
   padding: 6px 12px;
   background: var(--color-surface);
   color: var(--color-accent);
   border: 1px solid var(--color-accent);
+  border-radius: var(--border-radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-katalog {
+  padding: 6px 12px;
+  background: rgba(232, 112, 10, 0.12);
+  color: var(--color-accent);
+  border: 1px solid rgba(232, 112, 10, 0.4);
   border-radius: var(--border-radius);
   font-size: 0.85rem;
   cursor: pointer;

@@ -6,7 +6,6 @@ Auth via ~/.claude (Volume-Mount vom Host: C:/Users/sasch/.claude:/root/.claude:
 import json
 import os
 import subprocess
-from django.conf import settings
 from .pii_filter import zensiere_pii
 
 
@@ -15,46 +14,55 @@ _CLAUDE_HOME = '/tmp/claude_home'
 
 def _ensure_claude_home() -> None:
     """
-    ~/.claude ist read-only gemountet. Wir kopieren die Credentials einmalig
+    ~/.claude und ~/.claude.json sind read-only gemountet. Wir kopieren beides
     in ein beschreibbares Verzeichnis, damit Claude CLI Session-Dateien ablegen kann.
     """
     import shutil
-    target = os.path.join(_CLAUDE_HOME, '.claude')
-    if not os.path.exists(target):
-        os.makedirs(_CLAUDE_HOME, exist_ok=True)
+    os.makedirs(_CLAUDE_HOME, exist_ok=True)
+
+    target_dir = os.path.join(_CLAUDE_HOME, '.claude')
+    if not os.path.exists(target_dir):
         src = '/root/.claude'
         if os.path.exists(src):
-            shutil.copytree(src, target)
+            shutil.copytree(src, target_dir)
         else:
-            os.makedirs(target, exist_ok=True)
+            os.makedirs(target_dir, exist_ok=True)
+
+    target_json = os.path.join(_CLAUDE_HOME, '.claude.json')
+    if not os.path.exists(target_json):
+        src_json = '/root/.claude.json'
+        if os.path.exists(src_json):
+            shutil.copy2(src_json, target_json)
 
 
-def claude_cli(prompt: str) -> str:
+def claude_cli(prompt: str, extra_dirs: list[str] | None = None) -> str:
     """
     Ruft Claude CLI auf. PII MUSS vor Aufruf zensiert sein.
-    Auth via ~/.claude Volume-Mount (wird in beschreibbares /tmp kopiert).
+    extra_dirs: Zusätzliche Verzeichnisse für MCP-Dateizugriff (z.B. /tmp für Bilder).
     """
     _ensure_claude_home()
     env = os.environ.copy()
     env['HOME'] = _CLAUDE_HOME
 
+    cmd = ['claude', '-p', prompt, '--output-format', 'text']
+    for d in (extra_dirs or []):
+        cmd += ['--add-dir', d]
+
     result = subprocess.run(
-        ['claude', '-p', prompt, '--output-format', 'text'],
+        cmd,
         capture_output=True,
         text=True,
-        timeout=60,
+        timeout=120,
         env=env,
     )
     if result.returncode != 0:
-        raise RuntimeError(f'Claude CLI Fehler: {result.stderr}')
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise RuntimeError(f'Claude CLI Fehler: {detail}')
     return result.stdout.strip()
 
 
 def strukturiere_notiz(transkript: str, kategorie: str) -> dict:
-    """
-    Strukturiert eine SHK-Aufmaß-Notiz via Claude.
-    PII wird vor dem Aufruf automatisch gefiltert.
-    """
+    """Strukturiert eine SHK-Aufmaß-Notiz via Claude."""
     transkript_zensiert = zensiere_pii(transkript)
 
     prompt = f"""Du bist ein SHK-Experte (Sanitär, Heizung, Klima).
@@ -75,34 +83,29 @@ Antworte NUR mit dem JSON-Objekt, kein anderer Text."""
 
     antwort = claude_cli(prompt)
 
-    # JSON aus Antwort extrahieren
     try:
-        # Manchmal gibt Claude Code-Blöcke zurück
         if '```' in antwort:
             start = antwort.index('{')
             end = antwort.rindex('}') + 1
             antwort = antwort[start:end]
         return json.loads(antwort)
     except (json.JSONDecodeError, ValueError):
-        return {
-            'ki_text': antwort,
-            'items': [],
-        }
+        return {'ki_text': antwort, 'items': []}
 
 
 def lese_visitenkarte(foto_vorderseite: str, foto_rueckseite: str | None = None) -> dict:
     """
-    Liest eine Visitenkarte via Claude Vision (Claude CLI mit @-Dateireferenz).
-    Unterstützt Vorder- und Rückseite. PII bleibt lokal.
+    Liest eine Visitenkarte via Claude Vision (claude -p mit @-Dateireferenz).
+    --add-dir gibt dem MCP-Filesystem Zugriff auf das Temp-Verzeichnis der Bilder.
     """
     if foto_rueckseite:
-        bilder_hinweis = (
+        bilder = (
             f'Vorderseite: @{foto_vorderseite}\n'
             f'Rückseite: @{foto_rueckseite}\n\n'
             f'Kombiniere die Informationen aus beiden Seiten.'
         )
     else:
-        bilder_hinweis = f'Bild: @{foto_vorderseite}'
+        bilder = f'@{foto_vorderseite}'
 
     prompt = (
         f'Du bist ein Assistent, der Visitenkarten ausliest. '
@@ -124,11 +127,16 @@ def lese_visitenkarte(foto_vorderseite: str, foto_rueckseite: str | None = None)
         f'  }},\n'
         f'  "konfidenz": 0.0 bis 1.0\n'
         f'}}\n\n'
-        f'{bilder_hinweis}\n\n'
+        f'{bilder}\n\n'
         f'Antworte NUR mit dem JSON-Objekt.'
     )
 
-    antwort = claude_cli(prompt)
+    # Verzeichnis der Bilder explizit für MCP-Filesystem freigeben
+    dirs = list({os.path.dirname(os.path.abspath(foto_vorderseite))})
+    if foto_rueckseite:
+        dirs.append(os.path.dirname(os.path.abspath(foto_rueckseite)))
+
+    antwort = claude_cli(prompt, extra_dirs=dirs)
 
     try:
         if '```' in antwort:
@@ -142,14 +150,11 @@ def lese_visitenkarte(foto_vorderseite: str, foto_rueckseite: str | None = None)
 
 
 def transkribiere_audio(audio_path: str) -> str:
-    """
-    Transkribiert Audio via faster-whisper.
-    Läuft vollständig lokal — keine externen KI-Aufrufe.
-    """
+    """Transkribiert Audio via faster-whisper. Läuft vollständig lokal."""
     try:
         from faster_whisper import WhisperModel
         model = WhisperModel('small', device='auto', compute_type='int8')
         segments, _ = model.transcribe(audio_path, language='de')
         return ' '.join(seg.text.strip() for seg in segments)
     except ImportError:
-        raise RuntimeError('faster-whisper nicht installiert. Bitte requirements.txt installieren.')
+        raise RuntimeError('faster-whisper nicht installiert.')

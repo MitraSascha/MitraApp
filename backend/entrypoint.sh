@@ -32,7 +32,7 @@ python manage.py makemigrations kontakte --noinput 2>&1 || true
 python manage.py makemigrations angebote --noinput 2>&1 || true
 python manage.py makemigrations push --noinput 2>&1 || true
 
-echo "Führe Migrations durch..."
+echo "Fuehre Migrations durch..."
 python manage.py migrate --noinput
 
 echo "=== Django startet ==="

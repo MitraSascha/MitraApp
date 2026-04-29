@@ -7,11 +7,12 @@ import { AngeboteStore } from '../stores/angebote.store';
 import { AngeboteService } from '../services/angebote.service';
 import { NotizStore } from '../../notizen/stores/notizen.store';
 import { NotizenService } from '../../notizen/services/notizen.service';
+import { ArtikelSucheComponent } from '../artikel-suche/artikel-suche.component';
 
 @Component({
   selector: 'app-angebot-editor',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ArtikelSucheComponent],
   templateUrl: './angebot-editor.component.html',
   styleUrl: './angebot-editor.component.scss',
 })
@@ -26,6 +27,7 @@ export class AngebotEditorComponent implements OnInit {
   readonly isNeu = signal(false);
   readonly isSaving = signal(false);
   readonly showKiPanel = signal(false);
+  readonly showArtikelSuche = signal(false);
 
   angebot: Angebot | null = null;
 
@@ -96,6 +98,21 @@ export class AngebotEditorComponent implements OnInit {
   addPosition(): void {
     if (!this.angebot) return;
     this.angebot = this.service.addPosition(this.angebot);
+  }
+
+  artikelUebernehmen(pos: Angebotsposition): void {
+    if (!this.angebot) return;
+    pos.pos_nr = this.angebot.positionen.length + 1;
+    const positionen = [...this.angebot.positionen, pos];
+    const netto = positionen.reduce((s, p) => s + p.gesamtpreis, 0);
+    this.angebot = {
+      ...this.angebot,
+      positionen,
+      nettobetrag: netto,
+      mwst_betrag: netto * (this.angebot.mwst_prozent / 100),
+      bruttobetrag: netto + netto * (this.angebot.mwst_prozent / 100),
+    };
+    this.showArtikelSuche.set(false);
   }
 
   updatePosition(posId: string, field: keyof Angebotsposition, value: string | number): void {

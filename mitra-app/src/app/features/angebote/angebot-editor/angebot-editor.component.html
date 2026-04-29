@@ -72,8 +72,19 @@
     <section class="section">
       <div class="section-header">
         <h2 class="section-title">Positionen</h2>
-        <button type="button" class="btn-add-pos" (click)="addPosition()">+ Position</button>
+        <div class="pos-actions">
+          <button
+            type="button"
+            class="btn-katalog"
+            (click)="showArtikelSuche.set(!showArtikelSuche())"
+          >Aus Katalog</button>
+          <button type="button" class="btn-add-pos" (click)="addPosition()">+ Position</button>
+        </div>
       </div>
+
+      @if (showArtikelSuche()) {
+        <app-artikel-suche (artikelGewaehlt)="artikelUebernehmen($event)" />
+      }
 
       @if (angebot.positionen.length === 0) {
         <p class="empty-pos">Noch keine Positionen. KI nutzen oder manuell hinzufügen.</p>

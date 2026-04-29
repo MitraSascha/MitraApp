@@ -6,7 +6,9 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = environment.apiUrl;
+  private readonly baseUrl = environment.production
+    ? environment.apiUrl
+    : `http://${window.location.hostname}:8000/api`;
 
   get<T>(path: string, params?: Record<string, string>): Observable<T> {
     const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;

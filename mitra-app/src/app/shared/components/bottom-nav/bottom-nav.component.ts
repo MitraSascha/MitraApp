@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { UIStore } from '../../ui/ui.store';
+import { AuthService } from '../../../core/services/auth.service';
 
 interface NavItem {
   path: string;
@@ -19,6 +20,7 @@ interface NavItem {
 export class BottomNavComponent {
   private readonly uiStore = inject(UIStore);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   readonly navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: '⊞' },
@@ -35,5 +37,10 @@ export class BottomNavComponent {
   navigate(path: string): void {
     this.uiStore.setActiveTab(path.replace('/', ''));
     this.router.navigate([path]);
+  }
+
+  async logout(): Promise<void> {
+    await this.auth.logout();
+    this.router.navigate(['/auth/login']);
   }
 }

@@ -1,0 +1,68 @@
+<div class="suche-panel">
+  <!-- Tabs -->
+  <div class="suche-tabs">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="quelle() === 'artikelstamm'"
+      (click)="setQuelle('artikelstamm')"
+    >Artikelstamm</button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="quelle() === 'hero'"
+      (click)="setQuelle('hero')"
+    >Hero CRM</button>
+  </div>
+
+  <!-- Suchzeile -->
+  <div class="suche-zeile">
+    <input
+      type="text"
+      class="suche-input"
+      [(ngModel)]="suchbegriff"
+      placeholder="Suchbegriff oder Artikelnummer…"
+      (keydown)="onKeydown($event)"
+      name="artikelsuche"
+    />
+    <button
+      type="button"
+      class="suche-btn"
+      (click)="suchen()"
+      [disabled]="!suchbegriff.trim() || isLoading()"
+    >
+      @if (isLoading()) {
+        <span class="spinner-xs"></span>
+      } @else {
+        Suchen
+      }
+    </button>
+  </div>
+
+  <!-- Ergebnisse -->
+  @if (fehler) {
+    <p class="suche-fehler">{{ fehler }}</p>
+  }
+
+  @if (ergebnisse.length > 0) {
+    <div class="ergebnis-liste">
+      @for (art of ergebnisse; track $index) {
+        <div class="ergebnis-zeile" (click)="uebernehmen(art)">
+          <div class="ergebnis-body">
+            <span class="ergebnis-name">{{ art.bezeichnung }}</span>
+            @if (art.artnr) {
+              <span class="ergebnis-artnr">{{ art.artnr }}</span>
+            }
+            @if (art.typ === 'leistung') {
+              <span class="leistung-badge">Leistung</span>
+            }
+          </div>
+          <div class="ergebnis-rechts">
+            <span class="ergebnis-einheit">{{ art.einheit }}</span>
+            <span class="ergebnis-preis">{{ formatPreis(art.preis_vk) }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

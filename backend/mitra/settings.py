@@ -107,10 +107,12 @@ REST_FRAMEWORK = {
     ],
 }
 
-# CORS (Angular Dev Server)
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:4200',
-    'http://127.0.0.1:4200',
+# CORS
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^http://localhost(:\d+)?$',
+    r'^http://127\.0\.0\.1(:\d+)?$',
+    r'^http://192\.168\.\d+\.\d+(:\d+)?$',
+    r'^http://10\.\d+\.\d+\.\d+(:\d+)?$',
 ]
 CORS_ALLOW_CREDENTIALS = True
 
