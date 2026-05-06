@@ -15,15 +15,17 @@ def _fix_hero_datetime(dt_str: str | None) -> str | None:
     """
     HERO gibt Berliner Lokalzeit mit +00:00 zurück (fälschlicherweise als UTC markiert).
     Wir parsen als naive datetime und lokalisieren korrekt als Europe/Berlin.
+    Gibt bei Parse-Fehler None zurück statt den rohen String, damit DateTimeField
+    keinen ungültigen Wert bekommt.
     """
     if not dt_str:
-        return dt_str
+        return None
     naive_str = dt_str.replace('+00:00', '').replace('Z', '')
     try:
         naive = datetime.fromisoformat(naive_str)
         return naive.replace(tzinfo=_BERLIN).isoformat()
     except ValueError:
-        return dt_str
+        return None
 
 
 HERO_GRAPHQL_URL = "https://login.hero-software.de/api/external/v7/graphql"
@@ -72,11 +74,10 @@ def fetch_hero_termine(hero_partner_id: str, tage_voraus: int = 7) -> list[dict]
 
     tz = ZoneInfo(settings.TIME_ZONE)
     now = datetime.now(tz=tz)
-    von = (now - timedelta(days=7)).strftime("%Y-%m-%dT00:00:00%z")
-    bis = (now + timedelta(days=tage_voraus)).strftime("%Y-%m-%dT23:59:59%z")
-    # HERO erwartet +02:00 statt +0200 — Doppelpunkt einfügen
-    von = von[:-2] + ":" + von[-2:]
-    bis = bis[:-2] + ":" + bis[-2:]
+    von_dt = (now - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
+    bis_dt = (now + timedelta(days=tage_voraus)).replace(hour=23, minute=59, second=59, microsecond=0)
+    von = von_dt.isoformat()
+    bis = bis_dt.isoformat()
 
     payload = {
         "query": CALENDAR_EVENTS_QUERY,
@@ -145,6 +146,10 @@ def sync_hero_termine_fuer_user(user: User, tage_voraus: int = 7) -> tuple[int, 
         if not hero_id:
             continue
 
+        beginn_parsed = _fix_hero_datetime(ht.get("start"))
+        if not beginn_parsed:
+            continue  # Ohne gültiges Datum kann kein Termin angelegt werden
+
         category_name = (ht.get("category") or {}).get("name", "")
 
         defaults = {
@@ -152,13 +157,18 @@ def sync_hero_termine_fuer_user(user: User, tage_voraus: int = 7) -> tuple[int, 
             "beschreibung": ht.get("description") or "",
             "typ":          _map_hero_type(category_name),
             "status":       _map_hero_status(bool(ht.get("is_done", False))),
-            "beginn":       _fix_hero_datetime(ht.get("start")),
-            "ende":         _fix_hero_datetime(ht.get("end") or ht.get("start")),
+            "beginn":       beginn_parsed,
+            "ende":         _fix_hero_datetime(ht.get("end")) or beginn_parsed,
             "ganztaegig":   bool(ht.get("all_day", False)),
             "adresse":      {},
             "monteure":     [user.id],
             "erstellt_von": user,
         }
+
+        # Prüfen ob sich beginn geändert hat → push_gesendet zurücksetzen
+        existing = Termin.objects.filter(hero_crm_id=hero_id).first()
+        if existing and str(existing.beginn.isoformat()) != beginn_parsed:
+            defaults['push_gesendet'] = False
 
         _, created = Termin.objects.update_or_create(
             hero_crm_id=hero_id,

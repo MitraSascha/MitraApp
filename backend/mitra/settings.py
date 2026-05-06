@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'apps.push',
     'apps.wissen',
     'apps.artikel',
+    'apps.bautagebuch',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +78,7 @@ DATABASES = {
         'NAME': os.getenv('ARTIKELSTAMM_DB_NAME', 'artikelstamm'),
         'USER': os.getenv('ARTIKELSTAMM_DB_USER', 'artikelstamm'),
         'PASSWORD': os.getenv('ARTIKELSTAMM_DB_PASSWORD', 'artikelstamm2024'),
-        'HOST': os.getenv('ARTIKELSTAMM_DB_HOST', 'localhost'),
+        'HOST': os.getenv('ARTIKELSTAMM_DB_HOST', '85.215.195.50'),
         'PORT': os.getenv('ARTIKELSTAMM_DB_PORT', '5433'),
     }
 }
@@ -116,6 +117,10 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# Ollama (Embedding-Server für Artikelsuche)
+OLLAMA_URL = os.getenv('OLLAMA_URL', 'http://10.0.0.2:11434')
+OLLAMA_EMBED_MODEL = os.getenv('OLLAMA_EMBED_MODEL', 'nomic-embed-text:latest')
+
 # Anthropic / Claude CLI
 ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
 
@@ -124,14 +129,28 @@ RAGFLOW_URL = os.getenv('RAGFLOW_URL', '')
 RAGFLOW_API_KEY = os.getenv('RAGFLOW_API_KEY', '')
 RAGFLOW_CHAT_ID = os.getenv('RAGFLOW_CHAT_ID', '')
 RAGFLOW_DATASET_ID = os.getenv('RAGFLOW_DATASET_ID', '')
+RAGFLOW_ANGEBOTE_CHAT_ID = os.getenv('RAGFLOW_ANGEBOTE_CHAT_ID', '528d3de647df11f18b6ebe8980b100ab')
 
 # HERO CRM
 HERO_API_TOKEN = os.getenv('HERO_API_TOKEN', '')
 
-# Web Push
+# IDS Connect (Großhändler — gutonlineplus.de)
+IDS_CONNECT_URL = os.getenv('IDS_CONNECT_URL', 'https://www.gutonlineplus.de/ids.aspx')
+IDS_CONNECT_KUNDENNUMMER = os.getenv('IDS_CONNECT_KUNDENNUMMER', '')
+IDS_CONNECT_USER = os.getenv('IDS_CONNECT_USER', '')
+IDS_CONNECT_PASSWORD = os.getenv('IDS_CONNECT_PASSWORD', '')
+
+# Web Push (VAPID)
 VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
 VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
 VAPID_SUBJECT = os.getenv('VAPID_SUBJECT', 'mailto:admin@mitra-app.de')
+
+if not VAPID_PRIVATE_KEY or not VAPID_PUBLIC_KEY:
+    import logging as _logging
+    _logging.getLogger('django').warning(
+        "VAPID_PRIVATE_KEY oder VAPID_PUBLIC_KEY nicht gesetzt — "
+        "Push-Notifications werden NICHT funktionieren!"
+    )
 
 # Media / Static
 MEDIA_URL = '/media/'
@@ -142,3 +161,35 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 USE_TZ = True
 TIME_ZONE = 'Europe/Berlin'
 LANGUAGE_CODE = 'de-de'
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {name} {levelname}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'angebote.ki_pipeline': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'apps.termine': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'apps.push': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}

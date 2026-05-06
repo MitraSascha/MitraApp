@@ -1,7 +1,13 @@
-.app-content {
-  padding-bottom: 60px; // Platz für Bottom-Nav
-  height: calc(100dvh - 60px);
-  overflow-y: auto;
+:host {
   display: flex;
   flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 60px; // Platz für Bottom-Nav
 }

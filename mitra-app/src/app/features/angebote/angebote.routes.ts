@@ -9,6 +9,13 @@ export const ANGEBOTE_ROUTES: Routes = [
       ),
   },
   {
+    path: 'neu',
+    loadComponent: () =>
+      import('./angebot-editor/angebot-editor.component').then(
+        m => m.AngebotEditorComponent
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./angebot-editor/angebot-editor.component').then(

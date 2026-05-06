@@ -25,6 +25,13 @@
         @if (notiz().titel) { {{ notiz().titel }} }
         @else { <span class="kein-titel">Kein Titel</span> }
       </div>
+      @if (herstellerListe.length > 0) {
+        <div class="hersteller-pills">
+          @for (h of herstellerListe; track h) {
+            <span class="hersteller-pill">{{ h }}</span>
+          }
+        </div>
+      }
       <div class="notiz-datum">{{ formatDatum(notiz().erstellt_am) }}</div>
     </div>
 

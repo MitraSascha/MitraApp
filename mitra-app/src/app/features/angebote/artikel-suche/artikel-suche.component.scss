@@ -1,6 +1,6 @@
 .suche-panel {
   background: var(--color-surface);
-  border: 1px solid rgba(232, 112, 10, 0.3);
+  border: 1px solid rgba(45, 212, 191, 0.3);
   border-radius: var(--border-radius);
   padding: var(--spacing-sm);
   display: flex;
@@ -31,6 +31,11 @@
     border-color: var(--color-accent);
     color: #fff;
     font-weight: 600;
+  }
+
+  &--gh.active {
+    background: #1a73e8;
+    border-color: #1a73e8;
   }
 }
 
@@ -106,7 +111,7 @@
   transition: background 0.1s;
 
   &:hover {
-    background: rgba(232, 112, 10, 0.12);
+    background: rgba(45, 212, 191, 0.12);
   }
 }
 
@@ -133,7 +138,7 @@
 .leistung-badge {
   display: inline-block;
   padding: 1px 7px;
-  background: rgba(232, 112, 10, 0.15);
+  background: rgba(45, 212, 191, 0.15);
   color: var(--color-accent);
   border-radius: 10px;
   font-size: 0.7rem;
@@ -159,4 +164,45 @@
   font-weight: 600;
   color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+// ── Großhändler ─────────────────────────────────────────
+
+.suche-btn--gh {
+  background: #1a73e8;
+  min-width: 100px;
+}
+
+.gh-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.gh-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+
+  .gh-waiting-hint {
+    font-size: 0.75rem;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+  }
+}
+
+.gh-badge {
+  display: inline-block;
+  padding: 1px 7px;
+  background: rgba(26, 115, 232, 0.15);
+  color: #1a73e8;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  width: fit-content;
 }

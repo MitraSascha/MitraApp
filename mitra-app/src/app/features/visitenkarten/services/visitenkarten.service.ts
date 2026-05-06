@@ -6,6 +6,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { SyncService } from '../../../core/services/sync.service';
 import { MitraDbService } from '../../../core/db/mitra-db.service';
 import { VisitenkartenStore } from '../stores/visitenkarten.store';
+import { UIStore } from '../../../shared/ui/ui.store';
 
 @Injectable({ providedIn: 'root' })
 export class VisitenkartenService {
@@ -13,6 +14,7 @@ export class VisitenkartenService {
   private readonly sync = inject(SyncService);
   private readonly db = inject(MitraDbService);
   private readonly store = inject(VisitenkartenStore);
+  private readonly ui = inject(UIStore);
 
   async ladeAlle(): Promise<void> {
     this.store.setLoading(true);
@@ -24,20 +26,29 @@ export class VisitenkartenService {
 
       const server = await firstValueFrom(this.api.get<Kontakt[]>('/kontakte/'));
       if (server) {
+        // Lokale pending-Einträge nicht überschreiben
+        const pendingIds = new Set(
+          lokal.filter(k => k.sync_status === 'pending').map(k => k.id)
+        );
+        const pendingItems = lokal.filter(k => pendingIds.has(k.id));
+
         // foto_url wird nicht ans Backend gesynct (base64 zu groß).
         // Beim Überschreiben des lokalen Eintrags das lokale Foto erhalten.
-        const merged = await Promise.all(
-          server.map(async (k) => {
+        const serverMerged = await Promise.all(
+          server.filter(k => !pendingIds.has(k.id)).map(async (k) => {
             if (k.foto_url) return k;
-            const lokal = await this.db.kontakte.get(k.id);
-            return lokal?.foto_url ? { ...k, foto_url: lokal.foto_url } : k;
+            const lokalItem = await this.db.kontakte.get(k.id);
+            return lokalItem?.foto_url ? { ...k, foto_url: lokalItem.foto_url } : k;
           }),
         );
-        await this.db.kontakte.bulkPut(merged);
-        this.store.setKontakte(merged);
+        await this.db.kontakte.bulkPut(serverMerged);
+        this.store.setKontakte([...serverMerged, ...pendingItems]);
       }
-    } catch {
-      // Offline: lokale Daten bleiben
+    } catch (err: unknown) {
+      const status = (err as { status?: number })?.status;
+      if (status && status >= 400) {
+        this.ui.showToast('Kontakte konnten nicht geladen werden');
+      }
     } finally {
       this.store.setLoading(false);
     }

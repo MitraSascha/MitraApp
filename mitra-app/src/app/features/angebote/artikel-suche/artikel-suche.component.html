@@ -1,49 +1,62 @@
 <div class="suche-panel">
   <!-- Tabs -->
   <div class="suche-tabs">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="quelle() === 'artikelstamm'"
-      (click)="setQuelle('artikelstamm')"
-    >Artikelstamm</button>
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="quelle() === 'hero'"
-      (click)="setQuelle('hero')"
-    >Hero CRM</button>
+    <button type="button" class="tab-btn" [class.active]="quelle() === 'artikelstamm'" (click)="setQuelle('artikelstamm')">Artikelstamm</button>
+    <button type="button" class="tab-btn" [class.active]="quelle() === 'hero'" (click)="setQuelle('hero')">Hero CRM</button>
+    <button type="button" class="tab-btn tab-btn--gh" [class.active]="quelle() === 'grosshaendler'" (click)="setQuelle('grosshaendler')">Großhändler</button>
   </div>
 
-  <!-- Suchzeile -->
-  <div class="suche-zeile">
-    <input
-      type="text"
-      class="suche-input"
-      [(ngModel)]="suchbegriff"
-      placeholder="Suchbegriff oder Artikelnummer…"
-      (keydown)="onKeydown($event)"
-      name="artikelsuche"
-    />
-    <button
-      type="button"
-      class="suche-btn"
-      (click)="suchen()"
-      [disabled]="!suchbegriff.trim() || isLoading()"
-    >
-      @if (isLoading()) {
-        <span class="spinner-xs"></span>
-      } @else {
-        Suchen
+  @if (quelle() === 'grosshaendler') {
+    <!-- Großhändler: Shop öffnen + Polling -->
+    <div class="gh-panel">
+      <div class="suche-zeile">
+        <input
+          type="text"
+          class="suche-input"
+          [(ngModel)]="suchbegriff"
+          placeholder="Suchbegriff (optional)…"
+          (keydown)="onKeydown($event)"
+          name="artikelsuche"
+        />
+        <button type="button" class="suche-btn suche-btn--gh" (click)="openGrosshaendlerShop(suchbegriff.trim())" [disabled]="ghWartet()">
+          @if (ghWartet()) {
+            <span class="spinner-xs"></span>
+          } @else {
+            Shop öffnen
+          }
+        </button>
+      </div>
+      @if (ghWartet()) {
+        <div class="gh-waiting">
+          <span class="spinner-xs"></span>
+          <span>Warte auf Artikel vom Großhändler…</span>
+          <p class="gh-waiting-hint">Wähle Artikel im Shop-Tab und klicke dort auf "Übernehmen".</p>
+        </div>
       }
-    </button>
-  </div>
+    </div>
+  } @else {
+    <!-- Artikelstamm / Hero: Direkte Suche -->
+    <div class="suche-zeile">
+      <input
+        type="text"
+        class="suche-input"
+        [(ngModel)]="suchbegriff"
+        placeholder="Suchbegriff oder Artikelnummer…"
+        (keydown)="onKeydown($event)"
+        name="artikelsuche"
+      />
+      <button type="button" class="suche-btn" (click)="suchen()" [disabled]="!suchbegriff.trim() || isLoading()">
+        @if (isLoading()) { <span class="spinner-xs"></span> } @else { Suchen }
+      </button>
+    </div>
+  }
 
-  <!-- Ergebnisse -->
+  <!-- Fehlermeldungen -->
   @if (fehler) {
     <p class="suche-fehler">{{ fehler }}</p>
   }
 
+  <!-- Ergebnisse (für alle Quellen gleich) -->
   @if (ergebnisse.length > 0) {
     <div class="ergebnis-liste">
       @for (art of ergebnisse; track $index) {
@@ -55,6 +68,9 @@
             }
             @if (art.typ === 'leistung') {
               <span class="leistung-badge">Leistung</span>
+            }
+            @if (art.quelle === 'grosshaendler') {
+              <span class="gh-badge">Großhändler</span>
             }
           </div>
           <div class="ergebnis-rechts">

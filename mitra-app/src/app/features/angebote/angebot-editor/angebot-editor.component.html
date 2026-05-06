@@ -11,40 +11,110 @@
     </div>
   </header>
 
-  <!-- KI-Generierung Panel (nur bei Neu) -->
+  @if (ladeError()) {
+    <div class="error-banner">
+      {{ ladeError() }}
+      <br><button class="error-btn" (click)="zurueck()">Zurück</button>
+    </div>
+  }
+
+  <!-- Quellen-Panel (Notiz / Materialliste laden + optional KI) -->
   @if (isNeu()) {
-    <section class="ki-panel">
-      <h2 class="section-title">KI-Angebot aus Notiz erstellen</h2>
-      <div class="form-group">
-        <label class="form-label">Notiz auswählen</label>
-        <select class="form-input" [(ngModel)]="ausgewaehlteNotizId" name="notizId">
-          <option value="">— Notiz wählen —</option>
-          @for (notiz of notizStore.notizen(); track notiz.id) {
-            <option [value]="notiz.id">{{ notiz.titel || notiz.freitext?.substring(0, 50) }}</option>
-          }
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Kunde (Firma) *</label>
-        <input type="text" class="form-input" [(ngModel)]="kundeFirma" name="kundeFirma" placeholder="Musterfirma GmbH" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Ansprechpartner</label>
-        <input type="text" class="form-input" [(ngModel)]="kundeAnsprechpartner" name="kundeAp" placeholder="Max Mustermann" />
-      </div>
-      <button
-        type="button"
-        class="btn-ki"
-        (click)="generiereAusNotiz()"
-        [disabled]="!ausgewaehlteNotizId || !kundeFirma.trim() || store.isGenerating()"
-      >
-        @if (store.isGenerating()) {
-          <span class="spinner-small"></span> KI generiert…
-        } @else {
-          🤖 KI-Angebot generieren
-        }
+    <section class="quellen-panel">
+      <button type="button" class="quellen-toggle" (click)="kiPanelOpen.update(v => !v)">
+        <span>{{ kiPanelOpen() ? '▾' : '▸' }}</span>
+        <span>Datenquelle &amp; KI-Assistent</span>
       </button>
-      <p class="ki-hint">— oder manuell befüllen —</p>
+      @if (kiPanelOpen()) {
+        <div class="quellen-body">
+          <!-- Kunde -->
+          <div class="quellen-row">
+            <div class="form-group">
+              <label class="form-label">Kunde (Firma) *</label>
+              <input type="text" class="form-input" [(ngModel)]="kundeFirma" name="kundeFirma" placeholder="Musterfirma GmbH" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ansprechpartner</label>
+              <input type="text" class="form-input" [(ngModel)]="kundeAnsprechpartner" name="kundeAp" placeholder="Max Mustermann" />
+            </div>
+          </div>
+
+          <!-- Quellen-Auswahl -->
+          <div class="quellen-selects">
+            <div class="form-group">
+              <label class="form-label">Notiz laden</label>
+              <select class="form-input" [(ngModel)]="ausgewaehlteNotizId" name="notizId">
+                <option value="">— keine —</option>
+                @for (notiz of notizStore.notizen(); track notiz.id) {
+                  <option [value]="notiz.id">{{ notiz.titel || notiz.freitext?.substring(0, 50) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Materialliste laden</label>
+              <select class="form-input" [(ngModel)]="ausgewaehlteMateriallisteId" name="materiallisteId">
+                <option value="">— keine —</option>
+                @for (b of berichteMitMaterial; track b.id) {
+                  <option [value]="b.id">{{ b.projekt_name }} ({{ b.datum }})</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Vorschau: Notiz-Inhalt -->
+          @if (ausgewaehlteNotiz; as notiz) {
+            <div class="quellen-vorschau">
+              <h4 class="vorschau-titel">Notiz: {{ notiz.titel || 'Ohne Titel' }}</h4>
+              @if (notiz.summary) {
+                <p class="vorschau-text">{{ notiz.summary }}</p>
+              }
+              @if (notiz.ki_items?.length) {
+                <ul class="vorschau-items">
+                  @for (item of notiz.ki_items; track item.id) {
+                    <li>
+                      @if (item.hersteller) { <span class="vorschau-hersteller">{{ item.hersteller }}</span> }
+                      {{ item.text }}
+                      @if (item.menge) { <span class="vorschau-menge">{{ item.menge }} {{ item.einheit }}</span> }
+                    </li>
+                  }
+                </ul>
+              }
+              @if (notiz.freitext && !notiz.ki_items?.length) {
+                <p class="vorschau-text">{{ notiz.freitext }}</p>
+              }
+            </div>
+          }
+
+          <!-- Vorschau: Materialliste -->
+          @if (ausgewaehlteMaterialliste; as btb) {
+            <div class="quellen-vorschau">
+              <h4 class="vorschau-titel">Material: {{ btb.projekt_name }} ({{ btb.datum }})</h4>
+              <ul class="vorschau-items">
+                @for (m of btb.materialliste; track m.id) {
+                  <li>
+                    <span class="vorschau-menge">{{ m.menge }} {{ m.einheit }}</span>
+                    {{ m.name }}
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- KI-Button -->
+          @if (ausgewaehlteNotizId || ausgewaehlteMateriallisteId) {
+            <button type="button" class="btn-ki" [disabled]="!kundeFirma.trim() || store.isGenerating()"
+              (click)="ausgewaehlteMateriallisteId ? generiereAusMaterialliste() : generiereAusNotiz()">
+              @if (store.isGenerating()) {
+                <span class="spinner-small"></span> KI generiert Angebot…
+              } @else {
+                KI-Angebot generieren
+              }
+            </button>
+          }
+
+          @if (kiError()) { <p class="ki-error">{{ kiError() }}</p> }
+        </div>
+      }
     </section>
   }
 
@@ -68,76 +138,152 @@
       </div>
     </section>
 
-    <!-- Positionen -->
-    <section class="section">
+    <!-- ═══ Positionen ═══ -->
+    <section class="section positionen-section">
       <div class="section-header">
         <h2 class="section-title">Positionen</h2>
-        <div class="pos-actions">
-          <button
-            type="button"
-            class="btn-katalog"
-            (click)="showArtikelSuche.set(!showArtikelSuche())"
-          >Aus Katalog</button>
-          <button type="button" class="btn-add-pos" (click)="addPosition()">+ Position</button>
-        </div>
+        <span class="pos-count">{{ angebot.positionen.length }}</span>
       </div>
 
-      @if (showArtikelSuche()) {
-        <app-artikel-suche (artikelGewaehlt)="artikelUebernehmen($event)" />
-      }
+      <!-- Neue Gruppe anlegen -->
+      <div class="gruppe-add">
+        <input type="text" class="form-input" [ngModel]="neuerGruppeName()" (ngModelChange)="neuerGruppeName.set($event)" (keydown.enter)="addGruppe()" name="neueGruppe" placeholder="Neue Gruppe (z.B. Trinkwasserstrang)" />
+        <button type="button" class="btn-add-gruppe" (click)="addGruppe()" [disabled]="!neuerGruppeName().trim()">+ Gruppe</button>
+      </div>
 
-      @if (angebot.positionen.length === 0) {
-        <p class="empty-pos">Noch keine Positionen. KI nutzen oder manuell hinzufügen.</p>
-      } @else {
-        <div class="positionen-liste">
-          @for (pos of angebot.positionen; track pos.id) {
-            <div class="position-card">
-              <div class="pos-nr">{{ pos.pos_nr }}</div>
-              <div class="pos-body">
-                <input
-                  type="text"
-                  class="pos-bezeichnung"
-                  [value]="pos.bezeichnung"
-                  (input)="updatePosition(pos.id, 'bezeichnung', $any($event.target).value)"
-                  placeholder="Bezeichnung"
-                />
-                @if (pos.artnr) {
-                  <span class="pos-artnr">Art-Nr.: {{ pos.artnr }}</span>
-                }
-                @if (pos.foerdermittel_hinweis) {
-                  <span class="foerdermittel-badge">{{ pos.foerdermittel_hinweis }}</span>
-                }
-                <div class="pos-preisreihe">
-                  <input
-                    type="number"
-                    class="pos-menge"
-                    [value]="pos.menge"
-                    (change)="updatePosition(pos.id, 'menge', +$any($event.target).value)"
-                    min="0"
-                  />
-                  <input
-                    type="text"
-                    class="pos-einheit"
-                    [value]="pos.einheit"
-                    (input)="updatePosition(pos.id, 'einheit', $any($event.target).value)"
-                  />
-                  <input
-                    type="number"
-                    class="pos-preis"
-                    [value]="pos.einzelpreis"
-                    (change)="updatePosition(pos.id, 'einzelpreis', +$any($event.target).value)"
-                    step="0.01"
-                    min="0"
-                  />
-                  <span class="pos-gesamt">{{ formatEuro(pos.gesamtpreis) }}</span>
-                </div>
+      <!-- Alle Positions-Listen verbinden (gruppenübergreifendes Verschieben) -->
+      <div cdkDropListGroup>
+
+        <!-- Gruppen (Drag & Drop) -->
+        <div cdkDropList [cdkDropListData]="angebot.gruppen" (cdkDropListDropped)="dropGruppe($event)" class="gruppen-drop-list" id="gruppen-list">
+          @for (gruppe of angebot.gruppen; track gruppe.id) {
+            <div class="gruppe-card" cdkDrag>
+              <div class="gruppe-header">
+                <span class="drag-handle" cdkDragHandle>⠿</span>
+                <span class="gruppe-nr">{{ gruppe.nummer }}.</span>
+                <input type="text" class="gruppe-titel" [value]="gruppe.titel" (input)="updateGruppe(gruppe.id, 'titel', $any($event.target).value)" />
+                <button type="button" class="btn-remove-gruppe" (click)="removeGruppe(gruppe.id)">✕</button>
               </div>
-              <button type="button" class="btn-remove-pos" (click)="removePosition(pos.id)">✕</button>
+
+              <!-- Kompakte Positionsliste (Drag & Drop — verbunden mit allen anderen) -->
+              <div cdkDropList
+                   [cdkDropListData]="getGruppenPositionen(gruppe.id)"
+                   (cdkDropListDropped)="dropPositionCross($event, gruppe.id)"
+                   [id]="'pos-list-' + gruppe.id"
+                   class="pos-drop-list">
+                @for (pos of getGruppenPositionen(gruppe.id); track pos.id) {
+                  <div class="pos-row" cdkDrag [cdkDragData]="pos" (click)="openPosEditor(pos.id)">
+                    <span class="drag-handle drag-handle--sm" cdkDragHandle>⠿</span>
+                    <span class="pos-row-nr">{{ pos.pos_nr }}</span>
+                    <span class="pos-row-name">{{ pos.bezeichnung || 'Ohne Bezeichnung' }}</span>
+                    <span class="pos-row-menge">{{ pos.menge }} {{ pos.einheit }}</span>
+                    <span class="pos-row-preis">{{ formatEuro(pos.vk_netto || 0) }}</span>
+                    <button type="button" class="pos-row-delete" (click)="removePosition(pos.id); $event.stopPropagation()">✕</button>
+                  </div>
+                }
+              </div>
+
+              <div class="gruppe-toolbar">
+                <button type="button" class="btn-add-pos-sm" (click)="addPositionToGruppe(gruppe.id)">+ Position</button>
+                <button type="button" class="btn-katalog-sm" (click)="toggleGruppeSuche(gruppe.id)">
+                  {{ sucheGruppeId() === gruppe.id ? '✕ Schließen' : '🔍 Katalog' }}
+                </button>
+              </div>
+
+              @if (sucheGruppeId() === gruppe.id) {
+                <app-artikel-suche (artikelGewaehlt)="artikelInGruppe(gruppe.id, $event)" />
+              }
+
+              @if (getGruppenPositionen(gruppe.id).length > 0) {
+                <div class="gruppe-summary">
+                  <div class="summary-row"><span>EK Gesamt</span><span>{{ formatEuro(gruppe.ek_gesamt) }}</span></div>
+                  <div class="summary-row">
+                    <span>Aufschlag</span>
+                    <span class="aufschlag-badge" [class.positiv]="gruppe.aufschlag_prozent >= 0" [class.negativ]="gruppe.aufschlag_prozent < 0">{{ gruppe.aufschlag_prozent | number:'1.1-1' }}%</span>
+                  </div>
+                  <div class="summary-row summary-row--total"><span>Netto Gesamt</span><span>{{ formatEuro(gruppe.netto_gesamt) }}</span></div>
+                </div>
+              }
             </div>
           }
         </div>
+
+        <!-- Ungruppierte Positionen -->
+        @if (getUngruppiertPositionen().length > 0 || (angebot.gruppen?.length ?? 0) === 0) {
+          @if ((angebot.gruppen?.length ?? 0) > 0) {
+            <h3 class="ungrouped-title">Ohne Gruppe</h3>
+          }
+          <div cdkDropList
+               [cdkDropListData]="getUngruppiertPositionen()"
+               (cdkDropListDropped)="dropPositionCross($event, undefined)"
+               id="pos-list-ungrouped"
+               class="pos-drop-list">
+            @for (pos of getUngruppiertPositionen(); track pos.id) {
+              <div class="pos-row" cdkDrag [cdkDragData]="pos" (click)="openPosEditor(pos.id)">
+                <span class="drag-handle drag-handle--sm" cdkDragHandle>⠿</span>
+                <span class="pos-row-nr">{{ pos.pos_nr }}</span>
+                <span class="pos-row-name">{{ pos.bezeichnung || 'Ohne Bezeichnung' }}</span>
+                <span class="pos-row-menge">{{ pos.menge }} {{ pos.einheit }}</span>
+                <span class="pos-row-preis">{{ formatEuro(pos.vk_netto || 0) }}</span>
+                <button type="button" class="pos-row-delete" (click)="removePosition(pos.id); $event.stopPropagation()">✕</button>
+              </div>
+            }
+          </div>
+        <div class="pos-toolbar">
+          <button type="button" class="btn-add-pos" (click)="addPosition()">+ Freie Position</button>
+          <button type="button" class="btn-katalog" (click)="showArtikelSuche.set(!showArtikelSuche())">
+            {{ showArtikelSuche() ? '✕ Schließen' : '🔍 Aus Katalog' }}
+          </button>
+        </div>
+        @if (showArtikelSuche()) {
+          <app-artikel-suche (artikelGewaehlt)="artikelUebernehmen($event)" />
+        }
+      }
+
+      </div><!-- /cdkDropListGroup -->
+
+      @if (angebot.positionen.length === 0) {
+        <div class="empty-pos">
+          <span class="empty-pos-icon">📋</span>
+          <p>Noch keine Positionen</p>
+          <p class="empty-pos-hint">Erstelle eine Gruppe oder füge freie Positionen hinzu</p>
+        </div>
       }
     </section>
+
+    <!-- ═══ Zusammenfassung ═══ -->
+    @if ((angebot.gruppen?.length ?? 0) > 0) {
+      <section class="section zusammenfassung-section">
+        <h2 class="section-title">Zusammenfassung</h2>
+        <div class="zusammenfassung-table">
+          <div class="zf-header">
+            <span class="zf-col-pos">Pos.</span>
+            <span class="zf-col-name">Bezeichnung</span>
+            <span class="zf-col-num">EK</span>
+            <span class="zf-col-num">Aufschl.</span>
+            <span class="zf-col-num">Gesamt</span>
+          </div>
+          @for (gruppe of angebot.gruppen; track gruppe.id) {
+            <div class="zf-row">
+              <span class="zf-col-pos">{{ gruppe.nummer }}.</span>
+              <span class="zf-col-name">{{ gruppe.titel }}</span>
+              <span class="zf-col-num">{{ formatEuro(gruppe.ek_gesamt) }}</span>
+              <span class="zf-col-num">
+                <span class="aufschlag-badge" [class.positiv]="gruppe.aufschlag_prozent >= 0" [class.negativ]="gruppe.aufschlag_prozent < 0">{{ gruppe.aufschlag_prozent | number:'1.1-1' }}%</span>
+              </span>
+              <span class="zf-col-num zf-col-total">{{ formatEuro(gruppe.netto_gesamt) }}</span>
+            </div>
+          }
+          <div class="zf-row zf-row--summe">
+            <span class="zf-col-pos"></span>
+            <span class="zf-col-name">Summe</span>
+            <span class="zf-col-num">{{ formatEuro(angebot.nettobetrag) }}</span>
+            <span class="zf-col-num"></span>
+            <span class="zf-col-num zf-col-total">{{ formatEuro(angebot.nettobetrag) }}</span>
+          </div>
+        </div>
+      </section>
+    }
 
     <!-- Summen -->
     <section class="section summen-section">
@@ -166,3 +312,138 @@
     </div>
   }
 </div>
+
+<!-- ═══ POSITION EDITOR OVERLAY ═══ -->
+@if (editPosId() && getEditPos(); as pos) {
+  <div class="pos-overlay" (click)="closePosEditor()">
+    <div class="pos-overlay-panel" (click)="$event.stopPropagation()">
+      <!-- Overlay Header -->
+      <div class="pos-overlay-header">
+        <span class="pos-nr-badge">{{ pos.pos_nr }}</span>
+        <span class="pos-overlay-title">Position bearbeiten</span>
+        <button type="button" class="pos-overlay-close" (click)="closePosEditor()">✕</button>
+      </div>
+
+      <div class="pos-overlay-body">
+        <!-- Bezeichnung -->
+        <div class="form-group">
+          <label class="form-label">Bezeichnung</label>
+          <input type="text" class="form-input" [value]="pos.bezeichnung" (input)="updatePosition(pos.id, 'bezeichnung', $any($event.target).value)" placeholder="Bezeichnung" />
+        </div>
+        @if (pos.artnr) {
+          <span class="pos-artnr">Art-Nr.: {{ pos.artnr }}</span>
+        }
+
+        <!-- Preiskalkulation -->
+        <h3 class="overlay-section-title">Preiskalkulation</h3>
+        <div class="kalk-row">
+          <div class="kalk-field">
+            <label>Menge</label>
+            <input type="number" [value]="pos.menge" (change)="updatePosition(pos.id, 'menge', +$any($event.target).value)" min="0" step="0.01" />
+          </div>
+          <div class="kalk-field kalk-field--small">
+            <label>Einheit</label>
+            <input type="text" [value]="pos.einheit" (input)="updatePosition(pos.id, 'einheit', $any($event.target).value)" />
+          </div>
+          <div class="kalk-field">
+            <label>EK/Einh.</label>
+            <input type="number" [value]="pos.ek_einheit" (change)="updatePosition(pos.id, 'ek_einheit', +$any($event.target).value)" step="0.01" min="0" />
+          </div>
+          <div class="kalk-field">
+            <label>LP/Einh.</label>
+            <input type="number" [value]="pos.lp_einheit" (change)="updatePosition(pos.id, 'lp_einheit', +$any($event.target).value)" step="0.01" min="0" />
+          </div>
+        </div>
+        <div class="kalk-row">
+          <div class="kalk-field">
+            <label>Aufschlag %</label>
+            <input type="number" [value]="pos.aufschlag_prozent" (change)="updatePosition(pos.id, 'aufschlag_prozent', +$any($event.target).value)" step="0.1" />
+          </div>
+          <div class="kalk-field">
+            <label>VK/Einh.</label>
+            <input type="number" [value]="pos.vk_einheit" (change)="onVkEinheitChange(pos.id, +$any($event.target).value)" step="0.01" min="0" />
+          </div>
+          <div class="kalk-field kalk-field--result">
+            <label>VK Netto</label>
+            <span class="kalk-value">{{ formatEuro(pos.vk_netto || 0) }}</span>
+          </div>
+        </div>
+        <div class="kalk-row kalk-row--rabatt">
+          <div class="kalk-field">
+            <label>Rabatt %</label>
+            <input type="number" [value]="pos.rabatt_prozent" (change)="updatePosition(pos.id, 'rabatt_prozent', +$any($event.target).value)" step="0.1" min="0" max="100" />
+          </div>
+          <div class="kalk-field kalk-field--result">
+            <label>Rabatt</label>
+            <span class="kalk-value">{{ formatEuro(pos.rabatt_betrag || 0) }}</span>
+          </div>
+          <div class="kalk-field">
+            <label>MwSt %</label>
+            <input type="number" [value]="pos.mwst_prozent ?? 19" (change)="updatePosition(pos.id, 'mwst_prozent', +$any($event.target).value)" step="0.1" min="0" />
+          </div>
+          <div class="kalk-field kalk-field--result kalk-field--highlight">
+            <label>Brutto</label>
+            <span class="kalk-value">{{ formatEuro(pos.brutto_gesamt || 0) }}</span>
+          </div>
+        </div>
+
+        <!-- Artikel-Details -->
+        @if (!pos.ist_manuell) {
+          <button type="button" class="btn-details-toggle" (click)="toggleDetails(pos.id)">
+            {{ expandedPosId() === pos.id ? '▾ Artikel-Details ausblenden' : '▸ Artikel-Details bearbeiten' }}
+          </button>
+
+          @if (expandedPosId() === pos.id && pos.artikel_details) {
+            <div class="artikel-details">
+              <p class="details-hint">Nur für dieses Angebot — Artikelstamm bleibt unverändert.</p>
+              <div class="details-grid">
+                <div class="detail-field">
+                  <label>Artikelname</label>
+                  <input type="text" [value]="pos.artikel_details.artikelname || ''" (input)="updateArtikelDetail(pos.id, 'artikelname', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Artikelnummer</label>
+                  <input type="text" [value]="pos.artikel_details.artikelnummer || ''" (input)="updateArtikelDetail(pos.id, 'artikelnummer', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Kategorie</label>
+                  <input type="text" [value]="pos.artikel_details.kategorie || ''" (input)="updateArtikelDetail(pos.id, 'kategorie', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Hersteller</label>
+                  <input type="text" [value]="pos.artikel_details.hersteller || ''" (input)="updateArtikelDetail(pos.id, 'hersteller', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Hersteller-Nr.</label>
+                  <input type="text" [value]="pos.artikel_details.hersteller_nr || ''" (input)="updateArtikelDetail(pos.id, 'hersteller_nr', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Lieferant</label>
+                  <input type="text" [value]="pos.artikel_details.lieferant || ''" (input)="updateArtikelDetail(pos.id, 'lieferant', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>EAN</label>
+                  <input type="text" [value]="pos.artikel_details.ean || ''" (input)="updateArtikelDetail(pos.id, 'ean', $any($event.target).value)" />
+                </div>
+                <div class="detail-field">
+                  <label>Matchcode</label>
+                  <input type="text" [value]="pos.artikel_details.matchcode || ''" (input)="updateArtikelDetail(pos.id, 'matchcode', $any($event.target).value)" />
+                </div>
+              </div>
+              <div class="detail-field detail-field--full">
+                <label>Beschreibung</label>
+                <textarea rows="3" [value]="pos.artikel_details.beschreibung || ''" (input)="updateArtikelDetail(pos.id, 'beschreibung', $any($event.target).value)"></textarea>
+              </div>
+            </div>
+          }
+        }
+      </div>
+
+      <!-- Overlay Footer -->
+      <div class="pos-overlay-footer">
+        <button type="button" class="btn-danger-sm" (click)="removePosition(pos.id); closePosEditor()">Löschen</button>
+        <button type="button" class="btn-primary-sm" (click)="closePosEditor()">Fertig</button>
+      </div>
+    </div>
+  </div>
+}

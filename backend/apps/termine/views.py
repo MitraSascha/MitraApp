@@ -11,6 +11,7 @@ from .hero_sync import sync_hero_termine_fuer_user
 
 
 class TerminViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     serializer_class = TerminSerializer
 
     def get_queryset(self):

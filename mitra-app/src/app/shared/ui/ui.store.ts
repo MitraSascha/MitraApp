@@ -8,6 +8,7 @@ export class UIStore {
   private readonly _activeTab = signal<string>('dashboard');
   private readonly _isGlobalLoading = signal<boolean>(false);
   private readonly _toastMessage = signal<string | null>(null);
+  private _toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly isOnline = this._isOnline.asReadonly();
   readonly activeTab = this._activeTab.asReadonly();
@@ -28,7 +29,13 @@ export class UIStore {
   }
 
   showToast(message: string, durationMs = 3000): void {
+    if (this._toastTimer) {
+      clearTimeout(this._toastTimer);
+    }
     this._toastMessage.set(message);
-    setTimeout(() => this._toastMessage.set(null), durationMs);
+    this._toastTimer = setTimeout(() => {
+      this._toastMessage.set(null);
+      this._toastTimer = null;
+    }, durationMs);
   }
 }

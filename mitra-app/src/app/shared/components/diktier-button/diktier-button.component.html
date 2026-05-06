@@ -1,0 +1,29 @@
+<div class="diktier-wrapper">
+  <button
+    type="button"
+    class="diktier-btn"
+    [class.recording]="status() === 'recording'"
+    [class.processing]="status() === 'processing'"
+    [disabled]="status() === 'processing'"
+    (click)="toggle()"
+    [title]="status() === 'recording' ? 'Diktat stoppen' : 'Diktat starten'"
+  >
+    @if (status() === 'idle' || status() === 'error') {
+      <span class="icon">🎙</span>
+    }
+    @if (status() === 'recording') {
+      <span class="icon pulse">⏹</span>
+    }
+    @if (status() === 'processing') {
+      <span class="spinner"></span>
+    }
+  </button>
+
+  @if (status() === 'recording') {
+    <span class="rec-label">REC</span>
+  }
+
+  @if (errorMsg()) {
+    <span class="error-hint">{{ errorMsg() }}</span>
+  }
+</div>

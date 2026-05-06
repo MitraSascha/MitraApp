@@ -1,0 +1,202 @@
+<div class="editor">
+  <header class="header">
+    <div class="header-inner">
+      <button class="btn-back" (click)="zurueck()">←</button>
+      <span class="header-title">{{ bericht?.projekt_name || 'Bautagebuch' }}</span>
+      <div class="spacer"></div>
+      @if (bericht) {
+        <button class="btn-save" (click)="speichern()" [disabled]="isSaving()">
+          {{ isSaving() ? 'Speichert...' : 'Speichern' }}
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (!bericht) {
+    <div class="loading-state">Bericht wird geladen...</div>
+  } @else {
+  <main class="content">
+    <!-- Datum & Projekt -->
+    <section class="section">
+      <div class="row">
+        <div class="field">
+          <label>Datum</label>
+          <input type="date" [(ngModel)]="bericht.datum" class="input" />
+        </div>
+        <div class="field">
+          <label>Projekt</label>
+          <input type="text" [(ngModel)]="bericht.projekt_name" class="input" placeholder="Baustelle / Projekt" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Wetter -->
+    <section class="section">
+      <label class="section-label">Wetter</label>
+      <div class="wetter-grid">
+        @for (w of wetterOptionen; track w.key) {
+          <button class="wetter-btn" [class.active]="bericht.wetter === w.key" (click)="setWetter(w.key)">
+            <span class="wetter-icon">{{ w.icon }}</span>
+            <span class="wetter-label">{{ w.label }}</span>
+          </button>
+        }
+      </div>
+      <div class="field temp-field">
+        <label>Temperatur</label>
+        <input type="number" [(ngModel)]="bericht.temperatur" class="input input-sm" placeholder="°C" />
+        <span class="unit">°C</span>
+      </div>
+    </section>
+
+    <!-- Mitarbeiter -->
+    <section class="section">
+      <label class="section-label">Mitarbeiter vor Ort</label>
+      @for (ma of bericht.mitarbeiter; track $index) {
+        <div class="mitarbeiter-row">
+          <span class="ma-name">{{ ma.name }}</span>
+          <span class="ma-rolle">{{ ma.rolle }}</span>
+          <input type="number" [ngModel]="ma.stunden" (ngModelChange)="updateStunden($index, $event)" class="input input-xs" min="0" max="24" step="0.5" />
+          <span class="unit">h</span>
+          <button class="btn-icon-sm" (click)="removeMitarbeiter($index)">✕</button>
+        </div>
+      }
+      <div class="add-row">
+        <input type="text" [(ngModel)]="neuerMitarbeiterName" class="input" placeholder="Name" (keydown.enter)="addMitarbeiter()" />
+        <select [(ngModel)]="neuerMitarbeiterRolle" class="input input-select">
+          <option>Monteur</option><option>Geselle</option><option>Azubi</option><option>Meister</option><option>Subunternehmer</option>
+        </select>
+        <button class="btn-add" (click)="addMitarbeiter()" [disabled]="!neuerMitarbeiterName.trim()">+</button>
+      </div>
+    </section>
+
+    <!-- Tabs: Arbeiten | Mängel | Materialliste -->
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab() === 'arbeiten'" (click)="activeTab.set('arbeiten')">Arbeiten</button>
+      <button class="tab" [class.active]="activeTab() === 'maengel'" (click)="activeTab.set('maengel')">
+        Mängel
+        @if (bericht.maengel.length > 0) {
+          <span class="tab-badge danger">{{ bericht.maengel.length }}</span>
+        }
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'materialliste'" (click)="activeTab.set('materialliste')">
+        Material
+        @if (bericht.materialliste.length > 0) {
+          <span class="tab-badge">{{ bericht.materialliste.length }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Tab: Arbeiten -->
+    @if (activeTab() === 'arbeiten') {
+      <section class="section">
+        <textarea [(ngModel)]="bericht.arbeiten_beschreibung" class="input textarea" rows="3" placeholder="Allgemeine Beschreibung der Arbeiten..."></textarea>
+        <button class="btn-ki" (click)="kiArbeiten()" [disabled]="isKiLoading() || !bericht.arbeiten_beschreibung?.trim()">
+          @if (isKiLoading()) { <span class="spinner-sm"></span> } @else { KI: Arbeitsschritte extrahieren }
+        </button>
+
+        @for (a of bericht.arbeiten_items; track a.id) {
+          <div class="item-row" [class.erledigt]="a.status === 'erledigt'">
+            <button class="check-btn" (click)="toggleArbeit(a.id)">{{ a.status === 'erledigt' ? '✓' : '○' }}</button>
+            <span class="item-text">{{ a.beschreibung }}</span>
+            <button class="btn-icon-sm" (click)="removeArbeit(a.id)">✕</button>
+          </div>
+        }
+
+        <div class="add-row">
+          <input type="text" [(ngModel)]="neueArbeit" class="input" placeholder="Arbeit hinzufügen..." (keydown.enter)="addArbeit()" />
+          <button class="btn-add" (click)="addArbeit()" [disabled]="!neueArbeit.trim()">+</button>
+        </div>
+      </section>
+    }
+
+    <!-- Tab: Mängel -->
+    @if (activeTab() === 'maengel') {
+      <section class="section">
+        @for (m of bericht.maengel; track m.id) {
+          <div class="mangel-card" [class.erledigt]="m.status === 'erledigt'">
+            <div class="mangel-header">
+              <button class="check-btn" (click)="toggleMangelStatus(m.id)">{{ m.status === 'erledigt' ? '✓' : '○' }}</button>
+              <span class="mangel-text">{{ m.beschreibung }}</span>
+              <button class="btn-icon-sm" (click)="removeMangel(m.id)">✕</button>
+            </div>
+            <div class="mangel-meta">
+              <div class="prio-btns">
+                <button class="prio-btn" [class.active]="m.prioritaet === 'niedrig'" (click)="setMangelPrio(m.id, 'niedrig')">Niedrig</button>
+                <button class="prio-btn mittel" [class.active]="m.prioritaet === 'mittel'" (click)="setMangelPrio(m.id, 'mittel')">Mittel</button>
+                <button class="prio-btn hoch" [class.active]="m.prioritaet === 'hoch'" (click)="setMangelPrio(m.id, 'hoch')">Hoch</button>
+                <button class="prio-btn kritisch" [class.active]="m.prioritaet === 'kritisch'" (click)="setMangelPrio(m.id, 'kritisch')">Kritisch</button>
+              </div>
+              <select class="input input-gewerk" [ngModel]="m.gewerk || ''" (ngModelChange)="setMangelGewerk(m.id, $event)">
+                <option value="">Gewerk wählen</option>
+                @for (g of GEWERKE; track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+            </div>
+            @if (m.gewerk) {
+              <span class="gewerk-badge">{{ m.gewerk }}</span>
+            }
+          </div>
+        }
+
+        <div class="diktier-textarea">
+          <div class="diktier-header">
+            <app-diktier-button (transkriptFertig)="onDiktierMangel($event)" />
+            <span class="diktier-label">Diktieren oder tippen</span>
+          </div>
+          <textarea [(ngModel)]="neuerMangel" class="input textarea" rows="3" placeholder="z.B. Fliesenleger schlecht gefliest, Trockenbauer falsche Maße, Bauverzögerung wegen..."></textarea>
+          <div class="ki-actions">
+            <button class="btn-ki" (click)="kiMaengel()" [disabled]="isKiLoading() || !neuerMangel.trim()">
+              @if (isKiLoading()) { <span class="spinner-sm"></span> Analysiert… } @else { KI: Mängel analysieren }
+            </button>
+            <button class="btn-add-manual" (click)="addMangel()" [disabled]="!neuerMangel.trim()">+ Manuell hinzufügen</button>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Tab: Materialliste -->
+    @if (activeTab() === 'materialliste') {
+      <section class="section">
+        @if (bericht.materialliste.length > 0) {
+          <div class="material-header">
+            <span class="mat-col-name">Material</span>
+            <span class="mat-col-menge">Menge</span>
+            <span class="mat-col-einheit">Einh.</span>
+            <span class="mat-col-actions"></span>
+          </div>
+        }
+        @for (m of bericht.materialliste; track m.id) {
+          <div class="material-row" [class.erledigt]="m.erledigt">
+            <button class="check-btn" (click)="toggleMaterial(m.id)">{{ m.erledigt ? '✓' : '○' }}</button>
+            <input type="text" class="input mat-input-name" [ngModel]="m.name" (ngModelChange)="updateMaterial(m.id, 'name', $event)" />
+            <input type="number" class="input input-xs" [ngModel]="m.menge" (ngModelChange)="updateMaterial(m.id, 'menge', +$event)" min="0" step="0.1" />
+            <input type="text" class="input input-xs" [ngModel]="m.einheit" (ngModelChange)="updateMaterial(m.id, 'einheit', $event)" style="width:50px" />
+            <button class="btn-icon-sm" (click)="removeMaterial(m.id)">✕</button>
+          </div>
+        }
+
+        <div class="diktier-textarea">
+          <div class="diktier-header">
+            <app-diktier-button (transkriptFertig)="onDiktierMaterial($event)" />
+            <span class="diktier-label">Diktieren oder tippen</span>
+          </div>
+          <textarea [(ngModel)]="neuesMaterial" class="input textarea" rows="3" placeholder="z.B. 10m Kupferrohr 15mm, 5 T-Stücke 15mm, 2 Flexschläuche 3/8 Zoll..."></textarea>
+          <div class="ki-actions">
+            <button class="btn-ki" (click)="kiMaterialliste()" [disabled]="isKiLoading() || !neuesMaterial.trim()">
+              @if (isKiLoading()) { <span class="spinner-sm"></span> Analysiert… } @else { KI: Materialliste erstellen }
+            </button>
+            <button class="btn-add-manual" (click)="addMaterial()" [disabled]="!neuesMaterial.trim()">+ Manuell hinzufügen</button>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Bemerkungen -->
+    <section class="section">
+      <label class="section-label">Bemerkungen</label>
+      <textarea [(ngModel)]="bericht.bemerkungen" class="input textarea" rows="3" placeholder="Weitere Anmerkungen..."></textarea>
+    </section>
+  </main>
+  }
+</div>

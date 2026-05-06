@@ -1,6 +1,7 @@
 .termin-detail {
   max-width: 700px;
   margin: 0 auto;
+  padding-bottom: 80px;
 }
 
 .detail-header {
@@ -41,16 +42,21 @@
   border-radius: var(--border-radius);
   font-weight: 600;
   cursor: pointer;
+  min-height: 44px;
   &:disabled { opacity: 0.5; }
 }
 
 .btn-delete {
   padding: 8px 16px;
-  background: rgba(207,34,46,0.15);
-  border: 1px solid var(--color-danger);
+  background: rgba(251, 113, 133, 0.15);
+  border: 1px solid rgba(251, 113, 133, 0.4);
   border-radius: var(--border-radius);
   color: var(--color-danger);
   cursor: pointer;
+  min-height: 44px;
+  font-weight: 600;
+  transition: background 0.15s;
+  &:hover { background: rgba(251, 113, 133, 0.25); }
 }
 
 .detail-body {
@@ -103,14 +109,14 @@
 }
 
 .erinnerung-chip {
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: var(--color-surface);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   color: var(--color-text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   cursor: pointer;
-  min-height: 34px;
+  min-height: 44px;
   transition: all 0.15s;
 
   &.active {
@@ -133,28 +139,28 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   color: var(--color-text-secondary);
-  padding: 6px 14px;
+  padding: 8px 14px;
   font-size: 0.875rem;
   cursor: pointer;
-  min-height: 34px;
+  min-height: 44px;
   transition: all 0.15s;
 
   &.active {
     background: rgba(76, 175, 80, 0.15);
-    border-color: #4CAF50;
-    color: #4CAF50;
+    border-color: var(--color-success);
+    color: var(--color-success);
   }
 }
 
 .typ-chip {
-  padding: 6px 14px;
+  padding: 8px 14px;
   background: var(--color-surface);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 999px;
   color: var(--color-text-secondary);
   font-size: 0.875rem;
   cursor: pointer;
-  min-height: 36px;
+  min-height: 44px;
 
   &.active {
     background: var(--color-accent);

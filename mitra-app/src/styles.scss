@@ -67,6 +67,7 @@
   font-weight: 600;
   transition: background var(--transition-fast), opacity var(--transition-fast);
   cursor: pointer;
+  min-height: var(--touch-target);
 
   &:disabled {
     opacity: 0.5;

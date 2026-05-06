@@ -1,5 +1,5 @@
 export type SyncOperation = 'create' | 'update' | 'delete';
-export type SyncEntityType = 'notiz' | 'termin' | 'kontakt' | 'angebot';
+export type SyncEntityType = 'notiz' | 'termin' | 'kontakt' | 'angebot' | 'bautagebuch';
 export type SyncQueueStatus = 'pending' | 'processing' | 'failed' | 'completed';
 
 export interface SyncQueueItem {

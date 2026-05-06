@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { TopicConfig } from '../../../core/models/notiz.constants';
 import { NotizItem, NotizItemTyp } from '../../../core/models/notiz.model';
 import { NotizenService } from '../services/notizen.service';
-import { DiktierButtonComponent } from '../diktier-button/diktier-button.component';
+import { DiktierButtonComponent } from '../../../shared/components/diktier-button/diktier-button.component';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({

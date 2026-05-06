@@ -3,6 +3,7 @@ from .models import Termin
 
 
 class TerminSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
     sync_status = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,3 +22,10 @@ class TerminSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['erstellt_von'] = self.context['request'].user
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Wenn sich beginn ändert → push_gesendet zurücksetzen (neue Erinnerung nötig)
+        neuer_beginn = validated_data.get('beginn')
+        if neuer_beginn and neuer_beginn != instance.beginn:
+            validated_data['push_gesendet'] = False
+        return super().update(instance, validated_data)

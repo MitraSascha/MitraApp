@@ -1,20 +1,21 @@
 // =============================================================
 // MitraApp — Design Tokens
+// Palette: Slate-Blue Dark + Teal Accent
 // =============================================================
 
 :root {
   // --- Farben ---
-  --color-bg:           #1C2128;   // Anthrazit (Primary Background)
-  --color-bg-surface:   #2D333B;   // Surface (Cards, Sidebar)
-  --color-bg-elevated:  #373E47;   // Elevated (Modals, Dropdowns)
-  --color-accent:       #E8700A;   // Orange (CTA, Highlights)
-  --color-accent-hover: #CF6209;   // Orange hover
-  --color-text:         #E6EDF3;   // Primärtext
-  --color-text-muted:   #8B949E;   // Sekundärtext / Placeholder
-  --color-border:       #444C56;   // Rahmen
-  --color-success:      #3FB950;
-  --color-warning:      #D29922;
-  --color-error:        #F85149;
+  --color-bg:           #0F172A;   // Deep Navy (Primary Background)
+  --color-bg-surface:   #1E293B;   // Slate Surface (Cards, Sidebar)
+  --color-bg-elevated:  #334155;   // Slate Elevated (Modals, Dropdowns)
+  --color-accent:       #2DD4BF;   // Teal (CTA, Highlights)
+  --color-accent-hover: #14B8A6;   // Teal hover
+  --color-text:         #F1F5F9;   // Primärtext
+  --color-text-muted:   #94A3B8;   // Sekundärtext / Placeholder
+  --color-border:       #334155;   // Rahmen
+  --color-success:      #34D399;
+  --color-warning:      #FBBF24;
+  --color-error:        #FB7185;
 
   // --- Typografie ---
   --font-headline:  'IBM Plex Sans', sans-serif;
@@ -41,16 +42,16 @@
   --space-12: 3rem;      // 48px
 
   // --- Radien ---
-  --radius-sm:  4px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
-  --radius-xl:  16px;
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  18px;
   --radius-full: 9999px;
 
   // --- Schatten ---
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 
   // --- Navigation ---
   --nav-bottom-height: 64px;
@@ -61,52 +62,58 @@
   --transition-normal: 250ms ease;
 
   // --- Aliases für Komponenten-Kompatibilität ---
-  --color-primary:        #1C2128;
-  --color-surface:        #2D333B;
-  --color-danger:         #F85149;
-  --color-text-primary:   #E6EDF3;
-  --color-text-secondary: #8B949E;
+  --color-primary:        #0F172A;
+  --color-surface:        #1E293B;
+  --color-danger:         #FB7185;
+  --color-text-primary:   #F1F5F9;
+  --color-text-secondary: #94A3B8;
 
-  --touch-target:   48px;
-  --border-radius:  8px;
+  --touch-target:   44px;
+  --touch-target-lg: 48px;
+  --border-radius:  10px;
   --spacing-xs:     0.25rem;
   --spacing-sm:     0.5rem;
   --spacing-md:     1rem;
   --spacing-lg:     1.5rem;
   --spacing-xl:     2rem;
 
-  // ── Notizen Design System (Notizen-App kompatibel) ─────────────────────────
-  // Hintergrund-Ebenen (OLED-nah, Warm-Tint)
-  --bg-0:     #0F0F0E;
-  --bg-1:     #181817;
-  --bg-2:     #222221;
-  --bg-3:     #2C2C2A;
-  --bg-input: #181817;
+  // ── Design System (alle Komponenten) ───────────────────────────────────────
+  // Hintergrund-Ebenen
+  --bg-0:     #0F172A;
+  --bg-1:     #1E293B;
+  --bg-2:     #334155;
+  --bg-3:     #475569;
+  --bg-input: #1E293B;
 
   // Text-Hierarchie
-  --text-primary:   #F2F2F0;
-  --text-secondary: #9E9E9B;
-  --text-tertiary:  #5E5E5B;
-  --text-disabled:  #3A3A38;
-  --text-accent:    #E8700A;
+  --text-primary:   #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary:  #64748B;
+  --text-disabled:  #475569;
+  --text-accent:    #2DD4BF;
 
   // Borders
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-muted:  rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.20);
-  --border-accent: rgba(232, 112, 10, 0.25);
+  --border-subtle: rgba(148, 163, 184, 0.08);
+  --border-muted:  rgba(148, 163, 184, 0.15);
+  --border-strong: rgba(148, 163, 184, 0.25);
+  --border-accent: rgba(45, 212, 191, 0.30);
 
-  // Akzent (MitraApp-Orange)
-  --accent:             #E8700A;
-  --accent-dim:         rgba(232, 112, 10, 0.15);
-  --accent-glow:        rgba(232, 112, 10, 0.08);
-  --accent-glow-strong: rgba(232, 112, 10, 0.28);
+  // Akzent (Teal)
+  --accent:             #2DD4BF;
+  --accent-dim:         rgba(45, 212, 191, 0.15);
+  --accent-glow:        rgba(45, 212, 191, 0.10);
+  --accent-glow-strong: rgba(45, 212, 191, 0.30);
+
+  // Semantic
+  --danger:  #FB7185;
+  --warning: #FBBF24;
+  --success: #34D399;
 
   // Schriften
   --font-ui:   'IBM Plex Mono', monospace;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  // Spacing (8px Grid, px-basiert für Notizen-Komponenten)
+  // Spacing (8px Grid, px-basiert für Komponenten)
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -114,7 +121,7 @@
   --sp-5: 24px;
   --sp-6: 32px;
 
-  // Radien (Notizen)
+  // Radien
   --radius-pill: 100px;
 
   // Übergänge

@@ -17,6 +17,7 @@ export class AngeboteListeComponent implements OnInit {
   private readonly service = inject(AngeboteService);
 
   readonly aktuellerTab = signal<'entwuerfe' | 'gesendet' | 'abgeschlossen'>('entwuerfe');
+  readonly loeschenKandidatId = signal<string | null>(null);
 
   async ngOnInit(): Promise<void> {
     await this.service.ladeAlle();
@@ -34,11 +35,29 @@ export class AngeboteListeComponent implements OnInit {
   }
 
   openDetail(id: string): void {
-    this.router.navigate(['/angebote', id]);
+    const angebot = this.store.angebote().find(a => a.id === id);
+    this.router.navigate(['/angebote', id], angebot ? { state: { angebot } } : undefined);
   }
 
   openNeu(): void {
     this.router.navigate(['/angebote', 'neu']);
+  }
+
+  loeschenAnfragen(id: string, event: Event): void {
+    event.stopPropagation();
+    this.loeschenKandidatId.set(id);
+  }
+
+  loeschenAbbrechen(): void {
+    this.loeschenKandidatId.set(null);
+  }
+
+  async loeschenBestaetigen(): Promise<void> {
+    const id = this.loeschenKandidatId();
+    if (id) {
+      await this.service.loeschen(id);
+      this.loeschenKandidatId.set(null);
+    }
   }
 
   formatEuro(value: number): string {

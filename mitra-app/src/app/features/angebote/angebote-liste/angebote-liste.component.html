@@ -22,6 +22,19 @@
     >Abgeschlossen ({{ store.abgeschlossene().length }})</button>
   </div>
 
+  @if (loeschenKandidatId()) {
+    <div class="dialog-backdrop" (click)="loeschenAbbrechen()">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <h3>Angebot löschen?</h3>
+        <p class="dialog-text">Das Angebot wird unwiderruflich gelöscht.</p>
+        <div class="dialog-actions">
+          <button class="btn-secondary" (click)="loeschenAbbrechen()">Abbrechen</button>
+          <button class="btn-danger" (click)="loeschenBestaetigen()">Löschen</button>
+        </div>
+      </div>
+    </div>
+  }
+
   @if (store.isLoading()) {
     <div class="loading">Laden…</div>
   } @else if (aktuelleAngebote.length === 0) {
@@ -33,6 +46,7 @@
     <ul class="angebot-list">
       @for (angebot of aktuelleAngebote; track angebot.id) {
         <li class="angebot-card" (click)="openDetail(angebot.id)">
+          <button class="btn-delete" (click)="loeschenAnfragen(angebot.id, $event)" title="Löschen">🗑</button>
           <div class="angebot-info">
             <span class="angebot-nr">{{ angebot.angebotsnummer }}</span>
             <span class="angebot-kunde">{{ angebot.kunde.firma }}</span>

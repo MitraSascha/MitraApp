@@ -47,15 +47,16 @@
 
 .badge {
   border: 1px solid;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   padding: 3px 8px;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--font-ui);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   flex-shrink: 0;
   white-space: nowrap;
+  line-height: 1.3;
 }
 
 .vonwem-badge {
@@ -96,10 +97,29 @@
 
 .kein-titel { color: var(--text-disabled); font-weight: 400; }
 
+.hersteller-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.hersteller-pill {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: rgba(232, 112, 10, 0.12);
+  color: var(--color-accent, #E8700A);
+  white-space: nowrap;
+}
+
 .notiz-datum {
   color: var(--text-tertiary);
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 11px;
   font-feature-settings: "tnum" 1;
 }
 
@@ -114,30 +134,30 @@
 .item-anzahl {
   background: var(--bg-3);
   border-radius: 10px;
-  padding: 2px 8px;
+  padding: 3px 8px;
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-tertiary);
   font-feature-settings: "tnum" 1;
   white-space: nowrap;
 }
 
 .loeschen-btn {
-  background: none;
-  border: none;
-  color: var(--text-tertiary);
+  background: rgba(251, 113, 133, 0.08);
+  border: 1px solid rgba(251, 113, 133, 0.15);
+  color: var(--danger, #FB7185);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   padding: 4px;
-  border-radius: 4px;
-  transition: color var(--t-fast), background var(--t-fast);
+  border-radius: 8px;
+  transition: background var(--t-fast), border-color var(--t-fast);
   min-width: 44px;
   min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  &:hover { color: #f87171; background: rgba(248, 113, 113, 0.08); }
+  &:hover { background: rgba(251, 113, 133, 0.18); border-color: rgba(251, 113, 133, 0.3); }
 }
 
 .chevron {
@@ -258,9 +278,10 @@
   summary {
     color: var(--text-tertiary);
     font-family: var(--font-ui);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.05em;
     cursor: pointer;
+    padding: 6px 0;
 
     &:hover { color: var(--text-secondary); }
   }
@@ -274,7 +295,7 @@
   margin-top: var(--sp-2);
   color: var(--text-tertiary);
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -295,13 +316,14 @@
   border: 1px solid var(--border-subtle);
   color: var(--text-tertiary);
   border-radius: var(--radius-sm);
-  padding: 7px 16px;
-  font-size: 11px;
+  padding: 9px 16px;
+  font-size: 12px;
   font-family: var(--font-ui);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
   transition: border-color var(--t-fast), color var(--t-fast);
+  min-height: var(--touch-target);
 
   &:hover { border-color: var(--border-accent); color: var(--accent); }
 }
@@ -316,7 +338,7 @@
   .notiz-titel { font-size: 17px; margin-bottom: 4px; }
   .notiz-datum { font-size: 12px; }
   .item-anzahl { font-size: 12px; padding: 3px 10px; }
-  .loeschen-btn { font-size: 16px; min-width: 32px; min-height: 32px; }
+  .loeschen-btn { font-size: 16px; }
 
   .body { padding: var(--sp-4) var(--sp-5) var(--sp-5); }
 

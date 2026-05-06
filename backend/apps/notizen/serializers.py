@@ -20,6 +20,7 @@ class NotizFotoSerializer(serializers.ModelSerializer):
 
 
 class NotizSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(required=False)
     fotos = NotizFotoSerializer(many=True, read_only=True)
     sync_status = serializers.SerializerMethodField()
 

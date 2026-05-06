@@ -43,6 +43,7 @@ class Termin(models.Model):
     class Meta:
         app_label = 'termine'
         ordering = ['beginn']
+        unique_together = [('hero_crm_id', 'erstellt_von')]
 
     def __str__(self):
         return f'{self.titel} ({self.beginn})'

@@ -20,4 +20,5 @@ urlpatterns = [
     path('api/push/', include('apps.push.urls')),
     path('api/wissen/', include('apps.wissen.urls')),
     path('api/artikel/', include('apps.artikel.urls')),
+    path('api/bautagebuch/', include('apps.bautagebuch.urls')),
 ]

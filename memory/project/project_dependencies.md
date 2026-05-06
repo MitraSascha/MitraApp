@@ -21,7 +21,7 @@ updated: 2026-04-28
 | Dienst | Status | Verbindung |
 |---|---|---|
 | PostgreSQL (mitra) | ✅ Läuft | Docker, Port 5432, DB: `mitra`, User: `mitra`, PW: `mitra2024` |
-| PostgreSQL Artikelstamm | ✅ Vorhanden | `localhost:5433`, DB: `artikelstamm`, User: `artikelstamm`, PW: `artikelstamm2024` |
+| PostgreSQL Artikelstamm | ✅ Strato-Server | `85.215.195.50:5433`, DB: `artikelstamm`, User: `artikelstamm`, PW: `artikelstamm2024` |
 | Ollama + Qwen2.5 | ✅ Vorhanden | Lokal, via WireGuard erreichbar |
 | nomic-embed-text | ✅ Vorhanden | Über Ollama |
 | RAGflow Instanz | ✅ Vorhanden | Auf Strato |
@@ -30,7 +30,7 @@ updated: 2026-04-28
 
 | Container | Status | Hinweis |
 |---|---|---|
-| `pironi-django-1` | ✅ Läuft | Uvicorn, Port 8000 |
+| `pironi-django-1` | ✅ Läuft | Uvicorn, Port 8101 |
 | `pironi-postgres-1` | ✅ Läuft | Port 5432 |
 | `pironi-nginx-1` | ✅ Läuft | Reverse Proxy |
 | `pironi-frontend-1` | ✅ Läuft | Angular PWA |
@@ -83,7 +83,7 @@ DB_PORT=5432
 ARTIKELSTAMM_DB_NAME=artikelstamm
 ARTIKELSTAMM_DB_USER=artikelstamm
 ARTIKELSTAMM_DB_PASSWORD=artikelstamm2024
-ARTIKELSTAMM_DB_HOST=localhost
+ARTIKELSTAMM_DB_HOST=85.215.195.50
 ARTIKELSTAMM_DB_PORT=5433
 ANTHROPIC_API_KEY=          ← leer, aktuell nicht nötig
 RAGFLOW_URL=https://ragflow.eigene-tools.pro

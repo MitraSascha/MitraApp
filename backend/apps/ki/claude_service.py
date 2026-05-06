@@ -61,18 +61,90 @@ def claude_cli(prompt: str, extra_dirs: list[str] | None = None) -> str:
     return result.stdout.strip()
 
 
+HERSTELLER_PRO_KATEGORIE: dict[str, list[str]] = {
+    'sanitaer': [
+        # Armaturen
+        'Grohe', 'Hansgrohe', 'Dornbracht', 'Kludi', 'Hansa', 'Schell', 'Kemper',
+        'Oras', 'Damixa', 'Conti', 'KWC', 'Similor', 'Vola', 'Herzbach', 'Steinberg', 'Jörger',
+        # Keramik / Sanitärobjekte
+        'Villeroy & Boch', 'Duravit', 'Ideal Standard', 'Roca', 'Laufen', 'Keramag',
+        'Vigour', 'Sanibel', 'Diana', 'Bette', 'Kaldewei',
+        # Installationssysteme / Spülkästen
+        'Geberit', 'TECE', 'Viega', 'Sanit', 'Mepa', 'Wisa',
+        # Entwässerung / Abläufe
+        'ACO', 'Dallmer', 'KESSEL', 'HL Hutterer & Lechner',
+        # Duschkabinen
+        'HSK', 'Koralle', 'SanSwiss', 'Hüppe', 'Schulte', 'Kermi',
+        # Rohrsysteme
+        'Uponor', 'Rehau', 'Aquatherm', 'Wavin', 'Oventrop',
+        # Badmöbel
+        'Burgbad', 'Keuco', 'Pelipal', 'Puris', 'Fackelmann', 'Sanipa', 'Marlin', 'Emco', 'Sam',
+        # Barrierefreiheit
+        'Hewi',
+        # Warmwasser / Durchlauferhitzer
+        'Stiebel Eltron', 'Clage', 'AEG Haustechnik', 'Vaillant',
+        # Küche
+        'Franke', 'Blanco',
+    ],
+    'heizung': [
+        # Heizkessel / Wärmepumpen
+        'Viessmann', 'Buderus', 'Vaillant', 'Wolf', 'Weishaupt', 'Junkers', 'Brötje',
+        'Stiebel Eltron', 'Daikin', 'NIBE', 'Alpha Innotec', 'Waterkotte', 'Novelan',
+        'Lambda', 'iDM', 'Ochsner', 'Panasonic', 'LG', 'Samsung', 'Bosch Thermotechnik',
+        'ROTEX', 'MHG Heiztechnik', 'Elco', 'Hoval', 'De Dietrich', 'Remeha', 'Glen Dimplex',
+        # Heizkörper
+        'Zehnder', 'Kermi', 'Purmo', 'Arbonia', 'Bemm', 'Cosmo', 'Vogel & Noot', 'Schulte', 'Vasco',
+        # Pumpen
+        'Grundfos', 'Wilo', 'DAB Pumpen', 'KSB', 'Xylem',
+        # Regelungstechnik / Ventile / Thermostate
+        'Oventrop', 'Danfoss', 'IMI Heimeier', 'Honeywell Home', 'Caleffi',
+        'Flamco', 'Reflex Winkelmann', 'Esbe', 'Taconova', 'Herz Armaturen', 'Afriso', 'Resol',
+        # Fußbodenheizung / Rohrsysteme
+        'Uponor', 'Rehau', 'Roth', 'Schütz', 'Viega', 'Watts',
+        # Solarthermie
+        'Paradigma', 'Ritter Energie', 'CitrinSolar', 'Wagner Solar', 'Sonnenkraft',
+        # Hydraulik / Systemtechnik
+        'Meibes', 'PAW', 'Taco Comfort Solutions',
+        # Lüftung
+        'Vallox',
+        # Elektroheizung
+        'AEG Haustechnik',
+    ],
+}
+
+
 def strukturiere_notiz(transkript: str, kategorie: str) -> dict:
     """Strukturiert eine SHK-Aufmaß-Notiz via Claude."""
     transkript_zensiert = zensiere_pii(transkript)
 
+    hersteller_liste = HERSTELLER_PRO_KATEGORIE.get(kategorie, [])
+    hersteller_hinweis = ''
+    if hersteller_liste:
+        hersteller_hinweis = (
+            f"\nVerfügbare Hersteller für '{kategorie}': {', '.join(hersteller_liste)}\n"
+            f"WICHTIG zur Hersteller-Erkennung:\n"
+            f"- Setze \"hersteller\" auf den EXAKTEN Namen aus der Liste oben.\n"
+            f"- Erkenne auch Tippfehler: \"Daldewei\"→\"Kaldewei\", \"Groeh\"→\"Grohe\", \"Vigur\"→\"Vigour\".\n"
+            f"- Erkenne umgangssprachliche Nennung: \"Gebe\"→\"Geberit\", \"V&B\"→\"Villeroy & Boch\".\n"
+            f"- JEDES Produkt das einem Hersteller zugeordnet werden kann, MUSS den Hersteller bekommen.\n"
+            f"- Nur wenn wirklich KEIN Hersteller erkennbar ist, setze \"hersteller\" auf null.\n"
+        )
+
     prompt = f"""Du bist ein SHK-Experte (Sanitär, Heizung, Klima).
 Strukturiere diese Aufmaß-Notiz für Kategorie '{kategorie}' als JSON.
+{hersteller_hinweis}
+WICHTIG für das "text"-Feld:
+- Übernimm ALLE Produktdetails aus der Notiz: Modellname, Serie, Oberfläche, Maße, Farbe.
+- Beispiel: "Unterputz-Armatur Steelseries gebürstet" — NICHT nur "Unterputz-Armatur".
+- Beispiel: "Duschtasse 120x90x26 alpinweiß" — NICHT nur "Duschwanne".
+- Kürze NICHTS weg was für eine Bestellung/ein Angebot relevant wäre.
+- Der Text muss so genau sein, dass man damit im Katalog den richtigen Artikel findet.
 
 Format:
 {{
   "ki_text": "Zusammenfassung der Notiz",
   "items": [
-    {{"id": "uuid", "typ": "produkt|aufgabe|termin|notiz", "text": "...", "hersteller": "optional", "menge": null, "einheit": null, "faellig_am": null, "erledigt": false}}
+    {{"id": "uuid", "typ": "produkt|aufgabe|termin|notiz", "text": "...", "hersteller": "Herstellername oder null", "menge": null, "einheit": null, "faellig_am": null, "erledigt": false}}
   ]
 }}
 
@@ -84,10 +156,10 @@ Antworte NUR mit dem JSON-Objekt, kein anderer Text."""
     antwort = claude_cli(prompt)
 
     try:
-        if '```' in antwort:
-            start = antwort.index('{')
-            end = antwort.rindex('}') + 1
-            antwort = antwort[start:end]
+        start = antwort.find('{')
+        end = antwort.rfind('}')
+        if start != -1 and end != -1 and end > start:
+            antwort = antwort[start:end + 1]
         return json.loads(antwort)
     except (json.JSONDecodeError, ValueError):
         return {'ki_text': antwort, 'items': []}
@@ -139,10 +211,10 @@ def lese_visitenkarte(foto_vorderseite: str, foto_rueckseite: str | None = None)
     antwort = claude_cli(prompt, extra_dirs=dirs)
 
     try:
-        if '```' in antwort:
-            start = antwort.index('{')
-            end = antwort.rindex('}') + 1
-            antwort = antwort[start:end]
+        start = antwort.find('{')
+        end = antwort.rfind('}')
+        if start != -1 and end != -1 and end > start:
+            antwort = antwort[start:end + 1]
         data = json.loads(antwort)
         return {k: v for k, v in data.items() if v is not None}
     except (json.JSONDecodeError, ValueError):

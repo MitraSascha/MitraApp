@@ -83,6 +83,7 @@ export class WissenService {
         this.store.nachrichten()[this.store.nachrichten().length - 1].content,
         'complete'
       );
+      await this.store.persistSession();
     } catch {
       this.store.updateLetzteNachricht(
         'Fehler: Wissenssuche konnte nicht abgerufen werden.',

@@ -6,7 +6,7 @@ import { NotizenService } from '../services/notizen.service';
 import { NotizStore } from '../stores/notizen.store';
 import { NotizTyp, KiStrukturierResponse } from '../../../core/models/notiz.model';
 import { HerstellerPillsComponent } from '../hersteller-pills/hersteller-pills.component';
-import { DiktierButtonComponent } from '../diktier-button/diktier-button.component';
+import { DiktierButtonComponent } from '../../../shared/components/diktier-button/diktier-button.component';
 
 type ActiveTab = 'freitext' | 'ki';
 

@@ -43,6 +43,11 @@ export const routes: Routes = [
         loadChildren: () => import('./features/wissen/wissen.routes').then(m => m.WISSEN_ROUTES),
         title: 'Wissensdatenbank',
       },
+      {
+        path: 'bautagebuch',
+        loadChildren: () => import('./features/bautagebuch/bautagebuch.routes').then(m => m.BAUTAGEBUCH_ROUTES),
+        title: 'Bautagebuch',
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },

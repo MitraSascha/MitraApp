@@ -1,5 +1,5 @@
 """
-RAGflow Chat Proxy — SSE Streaming (async für ASGI/uvicorn).
+RAGflow Chat Proxy — SSE Streaming (synchron mit httpx).
 """
 import json
 import re
@@ -31,7 +31,7 @@ def chat_view(request):
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
-    async def stream_generator():
+    def stream_generator():
         ragflow_url = (
             f"{settings.RAGFLOW_URL}/api/v1/chats"
             f"/{settings.RAGFLOW_CHAT_ID}/completions"
@@ -45,15 +45,15 @@ def chat_view(request):
             body['session_id'] = session_id
 
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                async with client.stream('POST', ragflow_url, json=body, headers=headers) as response:
+            with httpx.Client(timeout=60.0) as client:
+                with client.stream('POST', ragflow_url, json=body, headers=headers) as response:
                     if response.status_code != 200:
                         yield f"data: {json.dumps({'error': f'RAGflow Fehler {response.status_code}'})}\n\n"
                         return
 
                     prev_answer = ''
 
-                    async for line in response.aiter_lines():
+                    for line in response.iter_lines():
                         if not line or not line.startswith('data:'):
                             continue
                         payload_str = line[5:].lstrip()

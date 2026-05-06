@@ -10,6 +10,7 @@ import { SyncService } from '../../../core/services/sync.service';
 import { MitraDbService } from '../../../core/db/mitra-db.service';
 import { NotizStore } from '../stores/notizen.store';
 import { AuthService } from '../../../core/services/auth.service';
+import { UIStore } from '../../../shared/ui/ui.store';
 
 @Injectable({ providedIn: 'root' })
 export class NotizenService {
@@ -18,6 +19,7 @@ export class NotizenService {
   private readonly db    = inject(MitraDbService);
   private readonly store = inject(NotizStore);
   private readonly auth  = inject(AuthService);
+  private readonly ui    = inject(UIStore);
 
   async ladeAlle(): Promise<void> {
     this.store.setLoading(true);
@@ -29,11 +31,24 @@ export class NotizenService {
 
       const serverDaten = await firstValueFrom(this.api.get<Notiz[]>('/notizen/'));
       if (serverDaten) {
-        await this.db.notizen.bulkPut(serverDaten);
-        this.store.setNotizen(serverDaten);
+        // Lokale pending-Einträge nicht überschreiben
+        const pendingIds = new Set(
+          lokaleDaten.filter(n => n.sync_status === 'pending').map(n => n.id)
+        );
+        const pendingItems = lokaleDaten.filter(n => pendingIds.has(n.id));
+        const merged = [
+          ...serverDaten.filter(n => !pendingIds.has(n.id)),
+          ...pendingItems,
+        ];
+        await this.db.notizen.bulkPut(serverDaten.filter(n => !pendingIds.has(n.id)));
+        this.store.setNotizen(merged);
       }
-    } catch {
-      // Offline: lokale Daten bleiben erhalten
+    } catch (err: unknown) {
+      // Nur bei echten Server-Fehlern den User informieren
+      const status = (err as { status?: number })?.status;
+      if (status && status >= 400) {
+        this.ui.showToast('Notizen konnten nicht geladen werden');
+      }
     } finally {
       this.store.setLoading(false);
     }

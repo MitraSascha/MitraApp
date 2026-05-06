@@ -194,7 +194,7 @@ Personenbezogene Daten verlassen den Server **niemals unzensiert**.
 |---|---|
 | Frontend | Angular 19+ PWA (Standalone Components) |
 | Backend | Django REST Framework |
-| Datenbank | PostgreSQL (Auth/Notizen) + PostgreSQL Port 5433 (Artikelstamm) |
+| Datenbank | PostgreSQL (Auth/Notizen) + PostgreSQL Strato 85.215.195.50:5433 (Artikelstamm) |
 | Wissensdatenbank | RAGflow (Strato-Server) |
 | KI | Claude CLI (`claude -p`) in Docker, Token vom Host |
 | Offline | IndexedDB + Workbox Service Worker |

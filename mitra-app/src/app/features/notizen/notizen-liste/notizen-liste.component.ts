@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotizStore } from '../stores/notizen.store';
 import { NotizenService } from '../services/notizen.service';
@@ -14,7 +14,7 @@ import { NeueNotizDialogComponent } from '../neue-notiz-dialog/neue-notiz-dialog
   templateUrl: './notizen-liste.component.html',
   styleUrl: './notizen-liste.component.scss',
 })
-export class NotizenListeComponent implements OnInit {
+export class NotizenListeComponent implements OnInit, OnDestroy {
   readonly store   = inject(NotizStore);
   readonly service = inject(NotizenService);
 
@@ -29,6 +29,8 @@ export class NotizenListeComponent implements OnInit {
   filterStatus   = signal<NotizStatus | 'alle'>('alle');
   zeigeFilter    = signal(false);
   zeigeNeuDialog = signal(false);
+
+  private debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   readonly hatAktiveFilter = computed(() =>
     this.filterVonwem() !== 'alle'
@@ -79,12 +81,35 @@ export class NotizenListeComponent implements OnInit {
     this.zeigeNeuDialog.set(false);
   }
 
-  async notizAktualisieren(notiz: Notiz): Promise<void> {
-    await this.service.aktualisiere(notiz.id, notiz);
+  notizAktualisieren(notiz: Notiz): void {
+    // Sofort im Store aktualisieren (UI bleibt reaktiv)
+    this.store.updateNotiz(notiz);
+
+    // Sync debounced — nur alle 800ms tatsächlich speichern & syncen
+    const existing = this.debounceTimers.get(notiz.id);
+    if (existing) clearTimeout(existing);
+    this.debounceTimers.set(notiz.id, setTimeout(() => {
+      this.debounceTimers.delete(notiz.id);
+      this.service.aktualisiere(notiz.id, notiz);
+    }, 800));
   }
 
   async notizLoeschen(id: string): Promise<void> {
+    // Laufendes Debounce abbrechen
+    const existing = this.debounceTimers.get(id);
+    if (existing) {
+      clearTimeout(existing);
+      this.debounceTimers.delete(id);
+    }
     await this.service.loesche(id);
+  }
+
+  ngOnDestroy(): void {
+    // Alle ausstehenden Debounce-Timer sofort ausführen
+    for (const [id, timer] of this.debounceTimers) {
+      clearTimeout(timer);
+    }
+    this.debounceTimers.clear();
   }
 
   statusFarbe(status: string): string {

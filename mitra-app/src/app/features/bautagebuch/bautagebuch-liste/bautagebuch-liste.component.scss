@@ -1,0 +1,207 @@
+.app {
+  background: var(--bg-0);
+  min-height: 100dvh;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: var(--z-sticky);
+  padding: 0 var(--sp-3);
+
+  @supports (backdrop-filter: blur(8px)) {
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 56px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.app-titel {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.spacer { flex: 1; }
+
+.btn-neu {
+  background: var(--accent, #2DD4BF);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--sp-3);
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: var(--sp-6) 0;
+  color: var(--text-secondary);
+}
+
+.liste { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.karte {
+  background: var(--bg-1, #161b22);
+  border: 1px solid var(--border-subtle, #30363d);
+  border-radius: 12px;
+  padding: var(--sp-3, 16px);
+  cursor: pointer;
+  position: relative;  // Needed for absolute delete button
+  transition: border-color 0.15s;
+
+  &:hover { border-color: var(--accent, #2DD4BF); }
+}
+
+.karte-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: 4px;
+}
+
+.datum {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sync-badge {
+  font-size: 11px;
+  background: var(--warning, #d29922);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.maengel-badge { color: var(--danger, #f85149); font-weight: 600; }
+
+.projekt {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0 8px;
+}
+
+.karte-meta {
+  display: flex;
+  gap: var(--sp-2);
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.btn-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.2);
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--danger, #FB7185);
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover { background: rgba(251, 113, 133, 0.2); }
+}
+
+// Dialog
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog {
+  background: var(--bg-1, #161b22);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: var(--sp-4);
+  width: min(90vw, 400px);
+
+  h3 { margin: 0 0 var(--sp-3); font-size: 16px; }
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  &:focus { border-color: var(--accent); }
+}
+
+.dialog-actions {
+  display: flex;
+  gap: var(--sp-2);
+  justify-content: flex-end;
+  margin-top: var(--sp-3);
+}
+
+.btn-primary {
+  background: var(--accent, #2DD4BF);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  &:disabled { opacity: 0.5; }
+}
+
+.btn-secondary {
+  background: var(--bg-2, #21262d);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+}
+
+.btn-danger {
+  background: var(--danger, #f85149);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dialog-text {
+  font-size: 14px;
+  color: var(--text-secondary, #8b949e);
+  margin: 0 0 var(--sp-3, 16px);
+}

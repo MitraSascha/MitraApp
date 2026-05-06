@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ACCESS_TOKEN_KEY } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -10,7 +11,7 @@ export class ApiService {
     ? environment.apiUrl
     : window.location.protocol === 'https:'
       ? '/api'                                          // HTTPS-Proxy (port 4443)
-      : `http://${window.location.hostname}:8000/api`; // direkter Dev-Server (port 4200)
+      : `http://${window.location.hostname}:8101/api`; // direkter Dev-Server (port 4400)
 
   get<T>(path: string, params?: Record<string, string>): Observable<T> {
     const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;
@@ -33,6 +34,10 @@ export class ApiService {
     return this.http.delete<T>(`${this.baseUrl}${path}`);
   }
 
+  getBlob(path: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${path}`, { responseType: 'blob' });
+  }
+
   uploadFile<T>(path: string, file: File, extraFields?: Record<string, string>): Observable<T> {
     const formData = new FormData();
     formData.append('file', file);
@@ -50,13 +55,17 @@ export class ApiService {
 
   streamSSE(path: string, body: unknown): Observable<string> {
     return new Observable<string>(observer => {
+      const controller = new AbortController();
+      const token = localStorage.getItem(ACCESS_TOKEN_KEY) ?? '';
+
       fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('mitra_access') ?? ''}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(body),
+        signal: controller.signal,
       }).then(async response => {
         if (!response.ok || !response.body) {
           observer.error(new Error(`SSE-Fehler: ${response.status}`));
@@ -64,13 +73,28 @@ export class ApiService {
         }
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          observer.next(decoder.decode(value, { stream: true }));
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            observer.next(decoder.decode(value, { stream: true }));
+          }
+          observer.complete();
+        } catch (err) {
+          if (!controller.signal.aborted) {
+            observer.error(err);
+          }
+        } finally {
+          reader.releaseLock();
         }
-        observer.complete();
-      }).catch(err => observer.error(err));
+      }).catch(err => {
+        if (!controller.signal.aborted) {
+          observer.error(err);
+        }
+      });
+
+      // Cleanup bei unsubscribe
+      return () => controller.abort();
     });
   }
 }

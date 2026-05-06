@@ -32,7 +32,22 @@ export class NotizKarteComponent implements OnInit {
   get td() { return TOPICS[this.notiz().topic ?? 'allgemein'] ?? TOPICS['allgemein']; }
 
   get gefilterteItems() {
-    return (this.notiz().ki_items ?? []).filter(i => i.text.trim());
+    return (this.notiz().ki_items ?? [])
+      .filter(i => i.text.trim())
+      .sort((a, b) => {
+        // Erst nach Hersteller gruppieren (alphabetisch), dann nach Text
+        const ha = (a.hersteller || 'ZZZ').toLowerCase();
+        const hb = (b.hersteller || 'ZZZ').toLowerCase();
+        if (ha !== hb) return ha.localeCompare(hb, 'de');
+        return a.text.localeCompare(b.text, 'de');
+      });
+  }
+
+  /** Einzigartige Hersteller für kompakte Anzeige im Header */
+  get herstellerListe(): string[] {
+    const items = this.notiz().ki_items ?? [];
+    const set = new Set(items.map(i => i.hersteller).filter(Boolean) as string[]);
+    return [...set].sort((a, b) => a.localeCompare(b, 'de'));
   }
 
   ngOnInit(): void {

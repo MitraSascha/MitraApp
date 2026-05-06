@@ -33,7 +33,7 @@
 
 .sync-ergebnis {
   font-size: 0.75rem;
-  color: #4CAF50;
+  color: var(--color-success);
   white-space: nowrap;
 }
 
@@ -46,11 +46,12 @@
   color: var(--color-text-secondary);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.8rem;
+  padding: 8px 12px;
+  font-size: 0.85rem;
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.2s;
+  min-height: 40px;
 
   &:disabled {
     opacity: 0.6;
@@ -96,15 +97,15 @@
 }
 
 .btn-fab {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   background: var(--color-accent);
   color: #fff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   text-decoration: none;
   line-height: 1;
   flex-shrink: 0;
@@ -139,7 +140,7 @@
   background: var(--color-surface);
 
   &.heute {
-    border: 1px solid rgba(232, 112, 10, 0.3);
+    border: 1px solid rgba(45, 212, 191, 0.3);
   }
 }
 
@@ -164,8 +165,8 @@
 .heute-badge {
   background: var(--color-accent);
   color: #fff;
-  font-size: 0.65rem;
-  padding: 0.1rem 0.45rem;
+  font-size: 0.7rem;
+  padding: 2px 6px;
   border-radius: 4px;
   font-weight: 700;
   text-transform: uppercase;
@@ -188,7 +189,8 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: 0.625rem 0.75rem;
+  padding: 10px 0.75rem;
+  min-height: 48px;
   text-decoration: none;
   color: var(--color-text-primary);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -206,9 +208,9 @@
   &.typ-notdienst { border-left-color: var(--color-danger); }
   &.typ-aufmass { border-left-color: var(--color-accent); }
   &.typ-wartung { border-left-color: var(--color-warning, #FF9800); }
-  &.typ-besprechung { border-left-color: #9C27B0; }
-  &.typ-lieferung { border-left-color: #4CAF50; }
-  &.typ-sonstiges { border-left-color: #607D8B; }
+  &.typ-besprechung { border-left-color: #A78BFA; }
+  &.typ-lieferung { border-left-color: #34D399; }
+  &.typ-sonstiges { border-left-color: #94A3B8; }
 }
 
 .termin-zeit {
@@ -250,32 +252,246 @@
 }
 
 .termin-typ-badge {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   color: var(--color-text-secondary);
   letter-spacing: 0.03em;
 }
 
 .erinnerung-icon {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 .btn-del {
-  background: none;
+  background: rgba(251, 113, 133, 0.08);
   border: none;
-  color: var(--color-text-secondary);
+  border-radius: 6px;
+  color: var(--color-danger, #FB7185);
   cursor: pointer;
-  padding: 4px;
-  font-size: 0.75rem;
-  border-radius: 4px;
+  padding: 8px;
+  font-size: 0.9rem;
   flex-shrink: 0;
-  opacity: 0.5;
-  transition: opacity 0.15s, color 0.15s;
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
 
   &:hover {
-    opacity: 1;
-    color: var(--color-danger);
+    background: rgba(251, 113, 133, 0.2);
   }
+}
+
+// ── View-Switcher ──────────────────────────────────────
+
+.view-switcher {
+  display: flex;
+  margin: 0 var(--spacing-md);
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+
+  button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 40px;
+
+    &.active {
+      background: var(--color-accent);
+      color: #fff;
+    }
+  }
+}
+
+.datum-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--spacing-md);
+  justify-content: center;
+}
+
+.nav-arrow {
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover { color: var(--color-accent); }
+}
+
+.datum-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  min-width: 160px;
+  text-align: center;
+}
+
+.btn-heute {
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-height: 36px;
+  &:hover { border-color: var(--color-accent); color: var(--color-accent); }
+}
+
+// ── Tagesansicht ───────────────────────────────────────
+
+.tages-container {
+  padding: 0 var(--spacing-md);
+  overflow-y: auto;
+}
+
+.timeline {
+  position: relative;
+  min-height: calc(17 * 50px); // 17 Stunden (6-22)
+}
+
+.timeline-stunde {
+  display: flex;
+  align-items: flex-start;
+  height: 50px;
+}
+
+.timeline-zeit {
+  width: 40px;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono, monospace);
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.timeline-linie {
+  flex: 1;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  height: 1px;
+  margin-top: 6px;
+}
+
+.termin-block {
+  position: absolute;
+  left: 48px;
+  right: 8px;
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 0.8rem;
+  overflow: hidden;
+  min-height: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+
+  &.typ-aufmass { background: rgba(232, 112, 10, 0.7); }
+  &.typ-wartung { background: rgba(255, 152, 0, 0.6); }
+  &.typ-notdienst { background: rgba(248, 81, 73, 0.7); }
+  &.typ-besprechung { background: rgba(167, 139, 250, 0.6); }
+  &.typ-lieferung { background: rgba(52, 211, 153, 0.6); }
+  &.typ-sonstiges { background: rgba(148, 163, 184, 0.5); }
+}
+
+.tb-zeit { font-size: 0.7rem; opacity: 0.8; }
+.tb-titel { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+// ── Monatsansicht ──────────────────────────────────────
+
+.monats-container {
+  padding: 0 var(--spacing-sm);
+}
+
+.monats-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  padding: 8px 0 4px;
+}
+
+.monats-woche {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.monats-zelle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 2px;
+  min-height: 48px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: border-color 0.1s;
+
+  &:hover { border-color: rgba(255,255,255,0.1); }
+  &.andere-monat { opacity: 0.3; }
+  &.heute {
+    border-color: var(--color-accent);
+    background: rgba(232, 112, 10, 0.08);
+    .zelle-tag { color: var(--color-accent); font-weight: 700; }
+  }
+}
+
+.zelle-tag {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.zelle-dots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+
+  &.dot-notdienst { background: var(--color-danger); }
+  &.dot-aufmass { background: var(--color-accent); }
+  &.dot-wartung { background: var(--color-warning, #FF9800); }
+  &.dot-besprechung { background: #A78BFA; }
+  &.dot-lieferung { background: #34D399; }
+  &.dot-sonstiges { background: #94A3B8; }
+}
+
+.dot-overflow {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
 }
 
 .empty-state {

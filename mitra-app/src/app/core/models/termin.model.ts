@@ -31,6 +31,7 @@ export interface Termin {
   notiz_id?: string;
   erstellt_am: string;
   geaendert_am: string;
+  erstellt_von?: number;
   sync_status: SyncStatus;
   local_id?: string;
   version: number;

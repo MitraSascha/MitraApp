@@ -4,14 +4,14 @@ import { firstValueFrom } from 'rxjs';
 import { AppUser, AuthTokens, LoginRequest } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
-const ACCESS_TOKEN_KEY = 'mitra_access';
+export const ACCESS_TOKEN_KEY = 'mitra_access';
 const REFRESH_TOKEN_KEY = 'mitra_refresh';
 
 function resolveApiUrl(): string {
   if (environment.production) return environment.apiUrl;
   return window.location.protocol === 'https:'
     ? '/api'                                          // HTTPS-Proxy (port 4443)
-    : `http://${window.location.hostname}:8000/api`; // direkter Dev-Server (port 4200)
+    : `http://${window.location.hostname}:8101/api`; // direkter Dev-Server (port 4400)
 }
 
 @Injectable({ providedIn: 'root' })

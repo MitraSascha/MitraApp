@@ -3,27 +3,34 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #2D333B;
-  border-bottom: 1px solid #E8700A;
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-accent);
 
-  &__text { flex: 1; color: #CDD9E5; font-size: 14px; }
+  &__text { flex: 1; color: var(--color-text); font-size: 14px; }
 
   &__btn {
-    background: #E8700A;
-    color: #fff;
+    background: var(--color-accent);
+    color: #000;
     border: none;
     border-radius: 6px;
-    padding: 6px 16px;
+    padding: 8px 16px;
     font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
+    min-height: 40px;
   }
 
   &__close {
     background: none;
     border: none;
-    color: #768390;
+    color: var(--color-text-muted);
     font-size: 20px;
     cursor: pointer;
     line-height: 1;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

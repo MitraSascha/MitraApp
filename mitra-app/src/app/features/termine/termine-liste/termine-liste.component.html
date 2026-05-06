@@ -7,7 +7,7 @@
       }
       <div class="sync-wrapper">
         <button class="btn-sync" [class.loading]="isSyncing()" (click)="toggleSyncMenu()" [disabled]="isSyncing()">
-          {{ isSyncing() ? '↻' : '⟳' }} Sync
+          {{ isSyncing() ? '↻' : '⟳' }}
         </button>
         @if (syncMenuOffen()) {
           <div class="sync-menu">
@@ -21,55 +21,136 @@
     </div>
   </header>
 
+  <!-- View-Switcher -->
+  <div class="view-switcher">
+    <button [class.active]="store.viewMode() === 'tag'" (click)="setView('tag')">Tag</button>
+    <button [class.active]="store.viewMode() === 'woche'" (click)="setView('woche')">Woche</button>
+    <button [class.active]="store.viewMode() === 'monat'" (click)="setView('monat')">Monat</button>
+  </div>
+
+  <!-- Datums-Navigation -->
+  <div class="datum-nav">
+    <button class="nav-arrow" (click)="navigiere(-1)">‹</button>
+    <span class="datum-label">{{ store.selectedDateLabel() }}</span>
+    <button class="nav-arrow" (click)="navigiere(1)">›</button>
+    <button class="btn-heute" (click)="gotoHeute()">Heute</button>
+  </div>
+
   @if (store.isLoading()) {
     <div class="loading-bar"></div>
   }
 
-  <div class="woche-container">
-    @for (tag of store.wochenTermine(); track tag.datum) {
-      <section class="tag-gruppe" [class.heute]="istHeute(tag.datum)">
-        <h2 class="tag-label">
-          <span>{{ tag.label }}</span>
-          @if (istHeute(tag.datum)) {
-            <span class="heute-badge">Heute</span>
-          }
-        </h2>
-
-        @if (tag.termine.length === 0) {
-          <div class="keine-termine">Keine Termine</div>
-        } @else {
-          <ul class="termin-items">
-            @for (t of tag.termine; track t.id) {
-              <li>
-                <a [routerLink]="[t.id]" class="termin-item" [ngClass]="'typ-' + t.typ">
-                  <div class="termin-zeit">{{ formatZeit(t.beginn) }}</div>
-                  <div class="termin-info">
-                    <span class="termin-titel">{{ t.titel }}</span>
-                    @if (t.adresse?.strasse) {
-                      <span class="termin-adresse">{{ t.adresse!.strasse }}, {{ t.adresse!.ort }}</span>
-                    }
-                  </div>
-                  <div class="termin-meta">
-                    <span class="termin-typ-badge">{{ t.typ }}</span>
-                    @if (t.erinnerung_minuten > 0) {
-                      <span class="erinnerung-icon" title="Erinnerung gesetzt">🔔</span>
-                    }
-                  </div>
-                  <button class="btn-del" (click)="loesche(t, $event)" title="Löschen">✕</button>
-                </a>
-              </li>
-            }
-          </ul>
+  <!-- ═══ TAGESANSICHT ═══ -->
+  @if (store.viewMode() === 'tag') {
+    <div class="tages-container">
+      @if (store.tagesTermine().length === 0) {
+        <div class="keine-termine">Keine Termine an diesem Tag</div>
+      }
+      <div class="timeline">
+        @for (stunde of stundenRaster; track stunde) {
+          <div class="timeline-stunde">
+            <span class="timeline-zeit">{{ stunde }}:00</span>
+            <div class="timeline-linie"></div>
+          </div>
         }
-      </section>
-    }
-
-    @if (store.termine().length === 0 && !store.isLoading()) {
-      <div class="empty-state">
-        <p>Keine Termine diese Woche.</p>
-        <p class="empty-hint">Nutze "Sync" um Termine aus HERO zu laden.</p>
-        <a routerLink="neu" class="btn-primary">Termin erstellen</a>
+        <!-- Termin-Blöcke -->
+        @for (t of store.tagesTermine(); track t.id) {
+          <a
+            [routerLink]="[t.id]"
+            class="termin-block"
+            [ngClass]="'typ-' + t.typ"
+            [style.top.px]="(getStundenPosition(t.beginn) - 6) * 50"
+            [style.height.px]="getDauer(t.beginn, t.ende) * 50"
+          >
+            <span class="tb-zeit">{{ formatZeit(t.beginn) }} – {{ formatZeit(t.ende) }}</span>
+            <span class="tb-titel">{{ t.titel }}</span>
+          </a>
+        }
       </div>
-    }
-  </div>
+    </div>
+  }
+
+  <!-- ═══ WOCHENANSICHT ═══ -->
+  @if (store.viewMode() === 'woche') {
+    <div class="woche-container">
+      @for (tag of store.wochenTermine(); track tag.datum) {
+        <section class="tag-gruppe" [class.heute]="istHeute(tag.datum)">
+          <h2 class="tag-label">
+            <span>{{ tag.label }}</span>
+            @if (istHeute(tag.datum)) {
+              <span class="heute-badge">Heute</span>
+            }
+          </h2>
+          @if (tag.termine.length === 0) {
+            <div class="keine-termine">Keine Termine</div>
+          } @else {
+            <ul class="termin-items">
+              @for (t of tag.termine; track t.id) {
+                <li>
+                  <a [routerLink]="[t.id]" class="termin-item" [ngClass]="'typ-' + t.typ">
+                    <div class="termin-zeit">{{ formatZeit(t.beginn) }}</div>
+                    <div class="termin-info">
+                      <span class="termin-titel">{{ t.titel }}</span>
+                      @if (t.adresse?.strasse) {
+                        <span class="termin-adresse">{{ t.adresse!.strasse }}, {{ t.adresse!.ort }}</span>
+                      }
+                    </div>
+                    <div class="termin-meta">
+                      <span class="termin-typ-badge">{{ t.typ }}</span>
+                      @if (t.erinnerung_minuten > 0) {
+                        <span class="erinnerung-icon">🔔</span>
+                      }
+                    </div>
+                    <button class="btn-del" (click)="loesche(t, $event)">✕</button>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+  }
+
+  <!-- ═══ MONATSANSICHT ═══ -->
+  @if (store.viewMode() === 'monat') {
+    <div class="monats-container">
+      <div class="monats-header">
+        <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+      </div>
+      @for (woche of store.monatsGrid(); track $index) {
+        <div class="monats-woche">
+          @for (zelle of woche; track zelle.datum) {
+            <button
+              class="monats-zelle"
+              [class.andere-monat]="!zelle.istAktuellerMonat"
+              [class.heute]="zelle.istHeute"
+              [class.hat-termine]="zelle.termine.length > 0"
+              (click)="selectTag(zelle.datum)"
+            >
+              <span class="zelle-tag">{{ zelle.tag }}</span>
+              @if (zelle.termine.length > 0) {
+                <div class="zelle-dots">
+                  @for (t of zelle.termine.slice(0, 3); track t.id) {
+                    <span class="dot" [ngClass]="'dot-' + t.typ"></span>
+                  }
+                  @if (zelle.termine.length > 3) {
+                    <span class="dot-overflow">+{{ zelle.termine.length - 3 }}</span>
+                  }
+                </div>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (store.termine().length === 0 && !store.isLoading() && store.viewMode() === 'woche') {
+    <div class="empty-state">
+      <p>Keine Termine diese Woche.</p>
+      <p class="empty-hint">Nutze "Sync" um Termine aus HERO zu laden.</p>
+      <a routerLink="neu" class="btn-primary">Termin erstellen</a>
+    </div>
+  }
 </div>

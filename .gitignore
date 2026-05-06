@@ -1,6 +1,11 @@
-# Secrets
+# Secrets & Credentials
 backend/.env
 *.env
+admin_info
+nicht lesen
+
+# Ausgemistete Dateien
+raus/
 
 # Python
 __pycache__/
@@ -30,3 +35,11 @@ postgres_data/
 .idea/
 *.swp
 *.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporäre Screenshots
+*.png
+!mitra-app/src/**/*.png

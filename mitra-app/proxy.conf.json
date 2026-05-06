@@ -1,24 +1,24 @@
 {
   "/api": {
-    "target": "http://django:8000",
+    "target": "http://django:8101",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"
   },
   "/admin": {
-    "target": "http://django:8000",
+    "target": "http://django:8101",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"
   },
   "/static": {
-    "target": "http://django:8000",
+    "target": "http://django:8101",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"
   },
   "/media": {
-    "target": "http://django:8000",
+    "target": "http://django:8101",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "warn"

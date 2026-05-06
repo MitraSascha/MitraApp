@@ -67,19 +67,21 @@ def transkribiere_view(request):
         return Response({'error': 'Keine Audiodatei'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Temporäre Datei für faster-whisper
-    suffix = os.path.splitext(audio_file.name)[1] or '.webm'
-    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-        for chunk in audio_file.chunks():
-            tmp.write(chunk)
-        tmp_path = tmp.name
-
+    tmp_path = None
     try:
+        suffix = os.path.splitext(audio_file.name)[1] or '.webm'
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+            for chunk in audio_file.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+
         text = transkribiere_audio(tmp_path)
         return Response({'text': text})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     finally:
-        os.unlink(tmp_path)
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 @api_view(['POST'])

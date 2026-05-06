@@ -17,13 +17,14 @@ select {
   border-radius: var(--radius-sm);
   padding: 8px 10px;
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   cursor: pointer;
   transition: border-color var(--t-fast);
   max-width: 110px;
+  min-height: 44px;
 
   option { background: var(--bg-2); color: var(--text-primary); }
 
@@ -56,7 +57,8 @@ select {
   }
 
   button {
-    width: 40px;
+    width: 44px;
+    min-height: 44px;
     flex-shrink: 0;
     border: none;
     border-radius: var(--radius-sm);
@@ -84,12 +86,13 @@ select {
 .h-chip {
   border: 1px solid;
   border-radius: var(--radius-pill);
-  padding: 5px 12px;
+  padding: 7px 12px;
   font-family: var(--font-ui);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   transition: all var(--t-fast);
   white-space: nowrap;
+  min-height: 36px;
 
   &.selected { font-weight: 700; }
 }

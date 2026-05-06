@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TerminStore, WochenTag } from '../stores/termine.store';
+import { TerminStore, WochenTag, KalenderView, MonatsZelle } from '../stores/termine.store';
 import { TermineService } from '../services/termine.service';
 import { Termin } from '../../../core/models/termin.model';
 
@@ -62,6 +62,37 @@ export class TermineListeComponent implements OnInit {
   istHeute(datum: string): boolean {
     return datum === this.heutigesDatum;
   }
+
+  // ── Kalender-Navigation ──
+  setView(mode: KalenderView): void {
+    this.store.setViewMode(mode);
+  }
+
+  navigiere(richtung: -1 | 1): void {
+    this.store.navigiere(richtung);
+  }
+
+  gotoHeute(): void {
+    this.store.heute();
+  }
+
+  selectTag(datum: string): void {
+    this.store.setSelectedDate(datum);
+    this.store.setViewMode('tag');
+  }
+
+  /** Stunde aus ISO-String extrahieren für Tagesansicht-Positionierung */
+  getStundenPosition(iso: string): number {
+    const d = new Date(iso);
+    return d.getHours() + d.getMinutes() / 60;
+  }
+
+  /** Dauer in Stunden berechnen */
+  getDauer(beginn: string, ende: string): number {
+    return Math.max(0.5, (new Date(ende).getTime() - new Date(beginn).getTime()) / 3600000);
+  }
+
+  readonly stundenRaster = Array.from({ length: 17 }, (_, i) => i + 6); // 6-22 Uhr
 
   trackById(_: number, t: Termin): string { return t.id; }
   trackByDatum(_: number, g: WochenTag): string { return g.datum; }

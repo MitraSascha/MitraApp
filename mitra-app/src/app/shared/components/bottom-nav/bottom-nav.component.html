@@ -1,16 +1,31 @@
+<!-- Mehr-Overlay -->
+@if (moreOpen()) {
+  <div class="more-backdrop" (click)="moreOpen.set(false)"></div>
+  <div class="more-overlay">
+    @for (item of moreItems; track item.path) {
+      <button class="more-item" [class.active]="isActive(item.path)" (click)="navigate(item.path)">
+        <span class="more-icon">{{ item.icon }}</span>
+        <span class="more-label">{{ item.label }}</span>
+      </button>
+    }
+    <div class="more-divider"></div>
+    <button class="more-item more-logout" (click)="logout()">
+      <span class="more-icon">⏻</span>
+      <span class="more-label">Abmelden</span>
+    </button>
+  </div>
+}
+
+<!-- Bottom Navigation -->
 <nav class="bottom-nav">
-  @for (item of navItems; track item.path) {
-    <button
-      class="nav-item"
-      [class.active]="isActive(item.path)"
-      (click)="navigate(item.path)"
-    >
+  @for (item of mainItems; track item.path) {
+    <button class="nav-item" [class.active]="isActive(item.path)" (click)="navigate(item.path)">
       <span class="nav-icon">{{ item.icon }}</span>
       <span class="nav-label">{{ item.label }}</span>
     </button>
   }
-  <button class="nav-item nav-logout" (click)="logout()">
-    <span class="nav-icon">⏻</span>
-    <span class="nav-label">Logout</span>
+  <button class="nav-item" [class.active]="moreOpen() || isMoreActive()" (click)="toggleMore()">
+    <span class="nav-icon">{{ moreOpen() ? '✕' : '☰' }}</span>
+    <span class="nav-label">Mehr</span>
   </button>
 </nav>

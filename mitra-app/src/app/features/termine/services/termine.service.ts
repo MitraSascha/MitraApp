@@ -7,6 +7,7 @@ import { SyncService } from '../../../core/services/sync.service';
 import { MitraDbService } from '../../../core/db/mitra-db.service';
 import { TerminStore } from '../stores/termine.store';
 import { AuthService } from '../../../core/services/auth.service';
+import { UIStore } from '../../../shared/ui/ui.store';
 
 @Injectable({ providedIn: 'root' })
 export class TermineService {
@@ -15,6 +16,7 @@ export class TermineService {
   private readonly db = inject(MitraDbService);
   private readonly store = inject(TerminStore);
   private readonly auth = inject(AuthService);
+  private readonly ui = inject(UIStore);
 
   private getWocheVonBis(): { von: string; bis: string } {
     const heute = new Date();
@@ -48,11 +50,23 @@ export class TermineService {
         this.api.get<Termin[]>(`/termine/?von=${von}&bis=${bis}`)
       );
       if (server) {
-        await this.db.termine.bulkPut(server);
-        this.store.setTermine(server);
+        // Lokale pending-Einträge nicht überschreiben
+        const pendingIds = new Set(
+          lokal.filter(t => t.sync_status === 'pending').map(t => t.id)
+        );
+        const pendingItems = lokal.filter(t => pendingIds.has(t.id));
+        const merged = [
+          ...server.filter(t => !pendingIds.has(t.id)),
+          ...pendingItems,
+        ];
+        await this.db.termine.bulkPut(server.filter(t => !pendingIds.has(t.id)));
+        this.store.setTermine(merged);
       }
-    } catch {
-      // Offline: lokale Daten bleiben
+    } catch (err: unknown) {
+      const status = (err as { status?: number })?.status;
+      if (status && status >= 400) {
+        this.ui.showToast('Termine konnten nicht geladen werden');
+      }
     } finally {
       this.store.setLoading(false);
     }
@@ -126,9 +140,13 @@ export class TermineService {
     const existing = await this.db.termine.get(id);
     if (!existing) return;
 
+    // Wenn sich beginn ändert → push_gesendet zurücksetzen (neue Erinnerung nötig)
+    const beginnGeaendert = changes.beginn && changes.beginn !== existing.beginn;
+
     const updated: Termin = {
       ...existing,
       ...changes,
+      ...(beginnGeaendert ? { push_gesendet: false } : {}),
       geaendert_am: new Date().toISOString(),
       sync_status: 'pending',
       version: existing.version + 1,

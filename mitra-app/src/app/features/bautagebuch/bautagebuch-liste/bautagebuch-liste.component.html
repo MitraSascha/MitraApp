@@ -1,0 +1,86 @@
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <span class="app-titel">Bautagebuch</span>
+      <div class="spacer"></div>
+      <button class="btn-neu" (click)="zeigeNeuDialog.set(true)">+ Neu</button>
+    </div>
+  </header>
+
+  <!-- Neu-Dialog -->
+  @if (zeigeNeuDialog()) {
+    <div class="dialog-backdrop" (click)="zeigeNeuDialog.set(false)">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <h3>Neuer Tagesbericht</h3>
+        <input
+          type="text"
+          class="input"
+          placeholder="Projekt / Baustelle"
+          [(ngModel)]="projektName"
+          (keydown.enter)="neuerBericht()"
+        />
+        <div class="dialog-actions">
+          <button class="btn-secondary" (click)="zeigeNeuDialog.set(false)">Abbrechen</button>
+          <button class="btn-primary" (click)="neuerBericht()" [disabled]="!projektName.trim()">Erstellen</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Lösch-Dialog -->
+  @if (loeschenKandidatId) {
+    <div class="dialog-backdrop" (click)="loeschenAbbrechen()">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <h3>Bericht löschen?</h3>
+        <p class="dialog-text">Der Tagesbericht wird unwiderruflich gelöscht.</p>
+        <div class="dialog-actions">
+          <button class="btn-secondary" (click)="loeschenAbbrechen()">Abbrechen</button>
+          <button class="btn-danger" (click)="loeschenBestaetigen()">Löschen</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <main class="content">
+    @if (store.isLoading()) {
+      <div class="loading">Lade Berichte...</div>
+    } @else if (store.berichte().length === 0) {
+      <div class="empty">
+        <p>Noch keine Tagesberichte vorhanden.</p>
+        <button class="btn-primary" (click)="zeigeNeuDialog.set(true)">Ersten Bericht erstellen</button>
+      </div>
+    } @else {
+      <div class="liste">
+        @for (bericht of store.berichte(); track bericht.id) {
+          <div class="karte" (click)="oeffneBericht(bericht)">
+            <div class="karte-header">
+              <span class="datum">{{ formatDatum(bericht.datum) }}</span>
+              <span class="wetter">{{ wetterIcon(bericht.wetter) }}</span>
+              @if (bericht.sync_status === 'pending') {
+                <span class="sync-badge">Nicht synchronisiert</span>
+              }
+            </div>
+            <h3 class="projekt">{{ bericht.projekt_name }}</h3>
+            <div class="karte-meta">
+              @if (bericht.mitarbeiter.length > 0) {
+                <span>{{ bericht.mitarbeiter.length }} Mitarbeiter</span>
+              }
+              @if (bericht.arbeiten_items.length > 0) {
+                <span>{{ bericht.arbeiten_items.length }} Arbeiten</span>
+              }
+              @if (bericht.maengel.length > 0) {
+                <span class="maengel-badge">{{ bericht.maengel.length }} Mängel</span>
+              }
+              @if (bericht.checkliste.length > 0) {
+                <span>{{ bericht.checkliste.filter(c => c.erledigt).length }}/{{ bericht.checkliste.length }} Checks</span>
+              }
+            </div>
+            <button class="btn-delete" (click)="loeschenAnfragen(bericht.id, $event)" title="Löschen">🗑</button>
+          </div>
+        }
+      </div>
+    }
+  </main>
+</div>

@@ -1,0 +1,39 @@
+mitra.eigene-tools.pro {
+	# Angular PWA
+	handle {
+		root * /srv/www
+		try_files {path} /index.html
+		file_server
+
+		# Service Worker — niemals cachen
+		@nocache path /ngsw-worker.js /push-sw.js /ngsw.json
+		header @nocache Cache-Control "no-cache, no-store, must-revalidate"
+
+		# Statische Assets — langfristig cachen
+		@assets path *.js *.css *.woff2 *.webmanifest *.png *.jpg *.svg *.ico
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+	}
+
+	# Django API
+	handle /api/* {
+		reverse_proxy django:8101
+	}
+
+	# Django Admin
+	handle /admin/* {
+		reverse_proxy django:8101
+	}
+
+	# Media-Dateien
+	handle /media/* {
+		root * /srv/media
+		file_server
+	}
+
+	# SSE (RAGflow Streaming) — kein Buffering
+	handle /api/wissen/* {
+		reverse_proxy django:8101 {
+			flush_interval -1
+		}
+	}
+}

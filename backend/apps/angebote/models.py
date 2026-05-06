@@ -25,7 +25,7 @@ class Angebot(models.Model):
     # Positionen als JSON-Array
     positionen = models.JSONField(default=list)
 
-    notiz_id = models.UUIDField(null=True, blank=True)
+    notiz_id = models.UUIDField(null=True, blank=True, db_index=True)
 
     nettobetrag = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     mwst_prozent = models.IntegerField(default=19)
@@ -53,7 +53,9 @@ class Angebot(models.Model):
         return f'{self.angebotsnummer}: {self.titel}'
 
     def berechne_summen(self):
-        netto = sum(float(p.get('gesamtpreis', 0)) for p in self.positionen)
-        self.nettobetrag = round(netto, 2)
-        self.mwst_betrag = round(netto * self.mwst_prozent / 100, 2)
-        self.bruttobetrag = round(float(self.nettobetrag) + float(self.mwst_betrag), 2)
+        from decimal import Decimal, ROUND_HALF_UP
+        cent = Decimal('0.01')
+        netto = sum(Decimal(str(p.get('gesamtpreis', 0))) for p in self.positionen)
+        self.nettobetrag = netto.quantize(cent, rounding=ROUND_HALF_UP)
+        self.mwst_betrag = (netto * self.mwst_prozent / 100).quantize(cent, rounding=ROUND_HALF_UP)
+        self.bruttobetrag = (self.nettobetrag + self.mwst_betrag).quantize(cent, rounding=ROUND_HALF_UP)

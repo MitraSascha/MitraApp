@@ -18,8 +18,13 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0 8px;
+  padding: 4px 8px;
   line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .detail-title {
@@ -33,12 +38,20 @@
 }
 
 .btn-delete {
-  background: none;
-  border: none;
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  border-radius: 8px;
   font-size: 1.2rem;
   cursor: pointer;
   color: var(--color-danger);
-  padding: 4px 8px;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover { background: rgba(251, 113, 133, 0.2); }
 }
 
 .section {
